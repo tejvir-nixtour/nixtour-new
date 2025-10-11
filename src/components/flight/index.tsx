@@ -68,21 +68,21 @@ export const FlightBox: React.FC<FlightDetail> = ({
 
     console.log('catalog', catalogProduct);
 
-    catalogProduct.ProductBrandOptions?.map((options: any) => {
+    catalogProduct?.ProductBrandOptions?.map((options: any) => {
       options?.ProductBrandOffering?.map((offering: any) => {
         flightDetails.push({
           priceDetails:
             offering?.BestCombinablePrice?.PriceBreakdown[0]?.Amount,
-          brandDetails: [
-            flightsData?.CatalogProductOfferingsResponse?.ReferenceList[3]?.Brand?.filter(
+          brandDetails:
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList[2]?.Brand?.filter(
               (b: any) => {
                 if (b.id === offering?.Brand?.BrandRef) {
                   return b;
                 }
               }
             ),
-          ],
-          productDetails: [
+
+          productDetails:
             flightsData?.CatalogProductOfferingsResponse?.ReferenceList[1]?.Product?.filter(
               (p: any) => {
                 if (p.id === offering?.Product[0]?.productRef) {
@@ -90,9 +90,9 @@ export const FlightBox: React.FC<FlightDetail> = ({
                 }
               }
             ),
-          ],
-          termsAndConditionsDetails: [
-            flightsData?.CatalogProductOfferingsResponse?.ReferenceList[2]?.TermsAndConditions?.filter(
+
+          termsAndConditionsDetails:
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList[3]?.TermsAndConditions?.filter(
               (t: any) => {
                 if (
                   t.id === offering?.TermsAndConditions?.termsAndConditionsRef
@@ -101,8 +101,8 @@ export const FlightBox: React.FC<FlightDetail> = ({
                 }
               }
             ),
-          ],
-          flightDetails: [
+
+          flightDetails:
             flightsData?.CatalogProductOfferingsResponse?.ReferenceList[0]?.Flight?.filter(
               (f: any) => {
                 if (options?.flightRefs?.includes(f.id)) {
@@ -110,13 +110,14 @@ export const FlightBox: React.FC<FlightDetail> = ({
                 }
               }
             ),
-          ],
         });
       });
     });
 
     return setSelectedFlight(flightDetails);
   }
+
+  console.log(flightsData);
 
   const filteredCatalogs =
     flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings?.CatalogProductOffering?.filter(
@@ -188,6 +189,15 @@ export const FlightBox: React.FC<FlightDetail> = ({
         const matchesArrival =
           !filters.arrivalTimeRange.start ||
           (arrMinutes >= arrStart && arrMinutes <= arrEnd);
+
+        console.log(
+          matchesStops,
+          matchesPrice,
+          matchesAirline,
+          matchesDuration,
+          matchesDeparture,
+          matchesArrival
+        );
 
         return (
           matchesStops &&

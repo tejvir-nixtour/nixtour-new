@@ -249,20 +249,20 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
       )
       .then((response) => {
         console.log(response.data);
-        if (response.data?.CatalogProductOfferingsResponse?.Result?.Error) {
-          // setCatalogProducts([]);
-          // setBrands([]);
-          // setProducts([]);
-          // setFlights([]);
-          // setTermsAndConditions([]);
-          setFlightsData(null);
+        // if (response.data?.CatalogProductOfferingsResponse?.Result?.Error) {
+        //   // setCatalogProducts([]);
+        //   // setBrands([]);
+        //   // setProducts([]);
+        //   // setFlights([]);
+        //   // setTermsAndConditions([]);
+        //   setFlightsData(null);
 
-          setLoading(false);
+        //   setLoading(false);
 
-          return;
+        //   return;
 
-          // throw Error('No Flights Found!');
-        }
+        //   // throw Error('No Flights Found!');
+        // }
         setFlightsData(response.data);
         // setCatalogProducts(
         //   response.data?.CatalogProductOfferingsResponse
@@ -367,11 +367,15 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
     };
 
     await axios
-      .post('http://localhost:4000/api/travelport/search', parameters, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      .post(
+        'https://nixtour-server.onrender.com/api/travelport/search',
+        parameters,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
       .then((response) => {
         console.log(response.data);
         if (response.data?.CatalogProductOfferingsResponse?.Result?.Error) {
