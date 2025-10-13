@@ -239,7 +239,7 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
 
     await axios
       .post(
-        'https://nixtour-server.onrender.com/api/travelport/search',
+        `${import.meta.env.VITE_SERVER_URL}/api/travelport/search`,
         parameters,
         {
           headers: {
@@ -368,7 +368,7 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
 
     await axios
       .post(
-        'https://nixtour-server.onrender.com/api/travelport/search',
+        `${import.meta.env.VITE_SERVER_URL}/api/travelport/search`,
         parameters,
         {
           headers: {
