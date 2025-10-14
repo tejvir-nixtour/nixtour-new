@@ -53,152 +53,261 @@ export const FlightBox: React.FC<FlightDetail> = ({
     return `${hours}H ${minutes}M`;
   }
 
-  function dialodData(id: string) {
-    const flightDetails: any = [];
+  function dialogData(id: string) {
+    const flightDetails: any[] = [];
 
-    flightDetails.id = id;
     const catalogProduct =
       flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings?.CatalogProductOffering?.find(
-        (catalog: any) => {
-          if (catalog.id === id) {
-            return catalog?.ProductBrandOptions;
-          }
-        }
+        (catalog: any) => catalog.id === id
       );
 
-    console.log('catalog', catalogProduct);
+    catalogProduct?.ProductBrandOptions?.forEach((options: any) => {
+      options?.ProductBrandOffering?.forEach((offering: any) => {
+        const flightRefs: string[] = [];
+        const flights: any[] = [];
 
-    catalogProduct?.ProductBrandOptions?.map((options: any) => {
-      options?.ProductBrandOffering?.map((offering: any) => {
+        // collect flightRefs
+        flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[1]?.Product?.forEach(
+          (p: any) => {
+            if (p?.id === offering?.Product?.[0]?.productRef) {
+              p?.FlightSegment?.forEach((f: any) => {
+                flightRefs.push(f?.Flight?.FlightRef);
+              });
+            }
+          }
+        );
+
+        // match flightRefs with flight details
+        flightRefs.forEach((refId: string) => {
+          const flight =
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
+              (f: any) => f?.id === refId
+            );
+          if (flight) flights.push(flight);
+        });
+
+        // push the collected details for this offering
         flightDetails.push({
           priceDetails:
-            offering?.BestCombinablePrice?.PriceBreakdown[0]?.Amount,
+            offering?.BestCombinablePrice?.PriceBreakdown?.[0]?.Amount,
           brandDetails:
-            flightsData?.CatalogProductOfferingsResponse?.ReferenceList[2]?.Brand?.filter(
-              (b: any) => {
-                if (b.id === offering?.Brand?.BrandRef) {
-                  return b;
-                }
-              }
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[2]?.Brand?.filter(
+              (b: any) => b.id === offering?.Brand?.BrandRef
             ),
-
           productDetails:
-            flightsData?.CatalogProductOfferingsResponse?.ReferenceList[1]?.Product?.filter(
-              (p: any) => {
-                if (p.id === offering?.Product[0]?.productRef) {
-                  return p;
-                }
-              }
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[1]?.Product?.filter(
+              (p: any) => p.id === offering?.Product?.[0]?.productRef
             ),
-
           termsAndConditionsDetails:
-            flightsData?.CatalogProductOfferingsResponse?.ReferenceList[3]?.TermsAndConditions?.filter(
-              (t: any) => {
-                if (
-                  t.id === offering?.TermsAndConditions?.termsAndConditionsRef
-                ) {
-                  return t;
-                }
-              }
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[3]?.TermsAndConditions?.filter(
+              (t: any) =>
+                t.id === offering?.TermsAndConditions?.termsAndConditionsRef
             ),
-
-          flightDetails:
-            flightsData?.CatalogProductOfferingsResponse?.ReferenceList[0]?.Flight?.filter(
-              (f: any) => {
-                if (options?.flightRefs?.includes(f.id)) {
-                  return f;
-                }
-              }
-            ),
+          flightDetails: flights,
         });
       });
     });
 
-    return setSelectedFlight(flightDetails);
+    setSelectedFlight(flightDetails);
   }
 
-  console.log(flightsData);
+  console.log(filters);
 
-  const filteredCatalogs =
+  const filteredCatalog =
     flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings?.CatalogProductOffering?.filter(
       (catalog: any) => {
-        const flightRefs = catalog?.ProductBrandOptions[0]?.flightRefs || [];
-        const firstFlight =
-          flightsData?.CatalogProductOfferingsResponse?.ReferenceList[0]?.Flight?.find(
-            (f: any) => f.id === flightRefs[0]
+        let flightRefs: any[] = [];
+        let firstFlight: any = null;
+        let lastFlight: any = null;
+        let stops: number = flightRefs?.length - 1;
+        let price: number = 0;
+
+        let depTime: string = '';
+        let arrTime: string = '';
+        let depMinutes: any = 0;
+        let arrMinutes: any = 0;
+
+        let depStart: string | number = '';
+        let depEnd: string | number = '';
+        let arrStart: string | number = '';
+        let arrEnd: string | number = '';
+
+        let matchesStops: any = true;
+
+        let matchesPrice: any = true;
+
+        let matchesAirline: boolean = true;
+
+        let durationMinutes: number | boolean = 0;
+        let matchesDuration: boolean = true;
+
+        let matchesDeparture: boolean = true;
+
+        let matchesArrival: boolean = true;
+
+        if (
+          catalog?.ProductBrandOptions?.[0]?.ProductBrandOffering?.[0]
+            .ContentSource === 'GDS'
+        ) {
+          flightRefs = catalog?.ProductBrandOptions?.[0]?.flightRefs || [];
+          firstFlight =
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
+              (f: any) => f.id === flightRefs?.[0]
+            );
+          lastFlight =
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
+              (f: any) => f.id === flightRefs?.[flightRefs?.length - 1]
+            );
+
+          // console.log(firstFlight, lastFlight);
+          if (!firstFlight || !lastFlight) {
+            console.log(flightRefs, catalog);
+            return false;
+          }
+
+          stops = flightRefs.length - 1;
+          price =
+            catalog?.ProductBrandOptions[0]?.ProductBrandOffering?.[0]
+              ?.BestCombinablePrice?.PriceBreakdown[0]?.Amount?.Total || 0;
+
+          depTime = firstFlight.Departure?.time || '';
+          arrTime = lastFlight.Arrival?.time || '';
+          depMinutes = formatTimeToMinutes(depTime);
+          arrMinutes = formatTimeToMinutes(arrTime);
+
+          depStart = formatTimeToMinutes(
+            filters.departureTimeRange.start || '00:00:00'
           );
-        const lastFlight =
-          flightsData?.CatalogProductOfferingsResponse?.ReferenceList[0]?.Flight?.find(
-            (f: any) => f.id === flightRefs[flightRefs.length - 1]
+          depEnd = formatTimeToMinutes(
+            filters.departureTimeRange.end || '23:59:59'
+          );
+          arrStart = formatTimeToMinutes(
+            filters.arrivalTimeRange.start || '00:00:00'
+          );
+          arrEnd = formatTimeToMinutes(
+            filters.arrivalTimeRange.end || '23:59:59'
           );
 
-        if (!firstFlight || !lastFlight) return false;
+          matchesStops =
+            (stops === 0 && filters.stops.nonStop) ||
+            (stops === 1 && filters.stops.oneStop) ||
+            (stops >= 2 && filters.stops.twoPlusStop);
 
-        const stops = flightRefs.length - 1;
-        const price =
-          catalog?.ProductBrandOptions[0]?.ProductBrandOffering[0]
-            ?.BestCombinablePrice?.PriceBreakdown[0]?.Amount?.Total || 0;
+          matchesPrice =
+            price >= filters.priceRange?.[0] &&
+            price <= filters.priceRange?.[1];
 
-        const depTime = firstFlight.Departure?.time || '';
-        const arrTime = lastFlight.Arrival?.time || '';
-        const depMinutes = formatTimeToMinutes(depTime);
-        const arrMinutes = formatTimeToMinutes(arrTime);
+          matchesAirline =
+            !filters.airline ||
+            filters.airline === 'Any' ||
+            firstFlight.carrier === filters.airline;
 
-        const depStart = formatTimeToMinutes(
-          filters.departureTimeRange.start || '00:00:00'
-        );
-        const depEnd = formatTimeToMinutes(
-          filters.departureTimeRange.end || '23:59:59'
-        );
-        const arrStart = formatTimeToMinutes(
-          filters.arrivalTimeRange.start || '00:00:00'
-        );
-        const arrEnd = formatTimeToMinutes(
-          filters.arrivalTimeRange.end || '23:59:59'
-        );
+          durationMinutes =
+            Number(
+              firstFlight?.duration?.slice(2).replace('H', '').replace('M', '')
+            ) || 0;
+          matchesDuration =
+            filters.duration === 'any' ||
+            (filters.duration === 'short' && durationMinutes < 180) ||
+            (filters.duration === 'medium' &&
+              durationMinutes >= 180 &&
+              durationMinutes <= 360) ||
+            (filters.duration === 'long' && durationMinutes > 360);
 
-        const matchesStops =
-          (stops === 0 && filters.stops.nonStop) ||
-          (stops === 1 && filters.stops.oneStop) ||
-          (stops >= 2 && filters.stops.twoPlusStop);
+          matchesDeparture =
+            !filters.departureTimeRange.start ||
+            (depMinutes >= depStart && depMinutes <= depEnd);
 
-        const matchesPrice =
-          price >= filters.priceRange[0] && price <= filters.priceRange[1];
+          matchesArrival =
+            !filters.arrivalTimeRange.start ||
+            (arrMinutes >= arrStart && arrMinutes <= arrEnd);
+        } else {
+          flightRefs = catalog?.ProductBrandOptions?.[0]?.flightRefs || [];
+          if (flightRefs?.length === 0) {
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[1]?.Product?.map(
+              (p: any) => {
+                if (
+                  p?.id ===
+                  catalog?.ProductBrandOptions?.[0]?.ProductBrandOffering?.[0]
+                    ?.Product?.[0]?.productRef
+                ) {
+                  p?.FlightSegment?.map((f: any) => {
+                    flightRefs.push(f?.Flight?.FlightRef);
+                  });
+                }
+              }
+            );
+          }
+          firstFlight =
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
+              (f: any) => f.id === flightRefs?.[0]
+            );
+          lastFlight =
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
+              (f: any) => f.id === flightRefs?.[flightRefs?.length - 1]
+            );
 
-        const matchesAirline =
-          !filters.airline ||
-          filters.airline === 'Any' ||
-          firstFlight.carrier === filters.airline;
+          if (!firstFlight || !lastFlight) {
+            return false;
+          }
 
-        const durationMinutes =
-          Number(
-            firstFlight.duration?.slice(2).replace('H', '').replace('M', '')
-          ) || 0;
-        const matchesDuration =
-          filters.duration === 'any' ||
-          (filters.duration === 'short' && durationMinutes < 180) ||
-          (filters.duration === 'medium' &&
-            durationMinutes >= 180 &&
-            durationMinutes <= 360) ||
-          (filters.duration === 'long' && durationMinutes > 360);
+          stops = flightRefs.length - 1;
+          price =
+            catalog?.ProductBrandOptions[0]?.ProductBrandOffering?.[0]
+              ?.BestCombinablePrice?.PriceBreakdown[0]?.Amount?.Total || 0;
 
-        const matchesDeparture =
-          !filters.departureTimeRange.start ||
-          (depMinutes >= depStart && depMinutes <= depEnd);
+          depTime = firstFlight.Departure?.time || '';
+          arrTime = lastFlight.Arrival?.time || '';
+          depMinutes = formatTimeToMinutes(depTime);
+          arrMinutes = formatTimeToMinutes(arrTime);
 
-        const matchesArrival =
-          !filters.arrivalTimeRange.start ||
-          (arrMinutes >= arrStart && arrMinutes <= arrEnd);
+          depStart = formatTimeToMinutes(
+            filters.departureTimeRange.start || '00:00:00'
+          );
+          depEnd = formatTimeToMinutes(
+            filters.departureTimeRange.end || '23:59:59'
+          );
+          arrStart = formatTimeToMinutes(
+            filters.arrivalTimeRange.start || '00:00:00'
+          );
+          arrEnd = formatTimeToMinutes(
+            filters.arrivalTimeRange.end || '23:59:59'
+          );
 
-        console.log(
-          matchesStops,
-          matchesPrice,
-          matchesAirline,
-          matchesDuration,
-          matchesDeparture,
-          matchesArrival
-        );
+          matchesStops =
+            (stops === 0 && filters.stops.nonStop) ||
+            (stops === 1 && filters.stops.oneStop) ||
+            (stops >= 2 && filters.stops.twoPlusStop);
 
+          matchesPrice =
+            price >= filters.priceRange?.[0] &&
+            price <= filters.priceRange?.[1];
+
+          matchesAirline =
+            !filters.airline ||
+            filters.airline === 'Any' ||
+            firstFlight.carrier === filters.airline;
+
+          durationMinutes =
+            Number(
+              firstFlight?.duration?.slice(2).replace('H', '').replace('M', '')
+            ) || 0;
+          matchesDuration =
+            filters.duration === 'any' ||
+            (filters.duration === 'short' && durationMinutes < 180) ||
+            (filters.duration === 'medium' &&
+              durationMinutes >= 180 &&
+              durationMinutes <= 360) ||
+            (filters.duration === 'long' && durationMinutes > 360);
+
+          matchesDeparture =
+            !filters.departureTimeRange.start ||
+            (depMinutes >= depStart && depMinutes <= depEnd);
+
+          matchesArrival =
+            !filters.arrivalTimeRange.start ||
+            (arrMinutes >= arrStart && arrMinutes <= arrEnd);
+        }
         return (
           matchesStops &&
           matchesPrice &&
@@ -210,30 +319,67 @@ export const FlightBox: React.FC<FlightDetail> = ({
       }
     );
 
-  console.log('filteredCatalogs', filteredCatalogs);
+  console.log('filteredCatalogs', filteredCatalog.length);
 
+  const filteredCatalogs = filteredCatalog;
+  // flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings
+  //   ?.CatalogProductOffering;
+
+  console.log('Total', filteredCatalogs?.length);
   return (
     <div className="flex flex-col my-6 md:my-10 items-center gap-4 w-full md:w-[60%]">
       {filteredCatalogs?.length ? (
         filteredCatalogs.map((catalog: any) => {
-          const direct =
-            catalog?.ProductBrandOptions[0]?.flightRefs?.length || 1;
-          const flightDetails: any[] = [];
-          flightsData?.CatalogProductOfferingsResponse?.ReferenceList[0]?.Flight?.map(
-            (f: any) => {
-              catalog?.ProductBrandOptions[0]?.flightRefs.map((id: string) => {
-                if (f.id === id) flightDetails.push(f);
-              });
+          const flightRefs: any[] = [];
+          flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[1]?.Product?.map(
+            (p: any) => {
+              if (
+                p?.id ===
+                catalog?.ProductBrandOptions?.[0]?.ProductBrandOffering?.[0]
+                  ?.Product?.[0]?.productRef
+              ) {
+                p?.FlightSegment?.map((f: any) => {
+                  flightRefs.push(f?.Flight?.FlightRef);
+                });
+              }
             }
           );
+          const direct =
+            catalog?.ProductBrandOptions?.[0]?.flightRefs?.length ||
+            flightRefs?.length ||
+            1;
+
+          // console.log(direct, flightRefs);
+          const flightDetails: any[] = [];
+
+          if (catalog?.ProductBrandOptions?.[0]?.flightRefs) {
+            catalog?.ProductBrandOptions?.[0]?.flightRefs?.map((id: string) => {
+              flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.map(
+                (f: any) => {
+                  if (f?.id === id) flightDetails.push(f);
+                }
+              );
+            });
+          } else {
+            flightRefs?.map((id: string) => {
+              flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.map(
+                (f: any) => {
+                  if (f?.id === id) {
+                    flightDetails.push(f);
+                  }
+                }
+              );
+            });
+          }
+
           let duration: string = calculateTimeDifference(
             {
-              date: flightDetails[0]?.Departure?.date,
-              time: flightDetails[0]?.Departure?.time.slice(0, 5),
+              date: flightDetails?.[0]?.Departure?.date,
+              time: flightDetails?.[0]?.Departure?.time.slice(0, 5),
             },
             {
-              date: flightDetails[direct - 1]?.Arrival?.date,
-              time: flightDetails[direct - 1]?.Arrival?.time.slice(0, 5),
+              date: flightDetails?.[direct - 1]?.Arrival?.date,
+              time: flightDetails?.[direct - 1]?.Arrival?.time.slice(0, 5),
             }
           );
 
@@ -246,11 +392,13 @@ export const FlightBox: React.FC<FlightDetail> = ({
               <div className="flex flex-row md:flex-col items-center md:items-start gap-1 min-w-[120px]">
                 <span className="text-sm font-medium text-gray-900">
                   {airLines.find(
-                    (airline) => airline.code === flightDetails[0]?.carrier
-                  )?.name || flightDetails[0]?.carrier}
+                    (airline) => airline.code === flightDetails?.[0]?.carrier
+                  )?.name ||
+                    flightDetails?.[0]?.operatingCarrierName ||
+                    flightDetails?.[0]?.carrier}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {flightDetails[0]?.carrier}-{flightDetails[0]?.number}
+                  {flightDetails?.[0]?.carrier}-{flightDetails?.[0]?.number}
                 </span>
               </div>
 
@@ -259,11 +407,11 @@ export const FlightBox: React.FC<FlightDetail> = ({
                 {/* Departure */}
                 <div className="flex flex-col items-center text-center">
                   <span className="text-base font-semibold text-gray-800">
-                    {flightDetails[0]?.Departure?.time.slice(0, 5)}
+                    {flightDetails?.[0]?.Departure?.time.slice(0, 5)}
                   </span>
                   <span className="text-xs text-gray-500">
-                    {flightDetails[0]?.Departure?.location} T
-                    {flightDetails[0]?.Departure?.terminal}
+                    {flightDetails?.[0]?.Departure?.location} T
+                    {flightDetails?.[0]?.Departure?.terminal || 0}
                   </span>
                 </div>
 
@@ -278,7 +426,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
                   >
                     {direct === 1 ? 'Direct' : `${direct - 1} Stop`}
                   </span>
-                  {showStops === catalog.id && direct > 1 && (
+                  {/* {showStops === catalog.id && direct > 1 && (
                     <div
                       className="p-4 bg-white rounded-xl shadow-md shadow-black absolute mt-8 z-10 text-md text-left"
                       onMouseOver={() => setShowStops(catalog.id)}
@@ -298,12 +446,12 @@ export const FlightBox: React.FC<FlightDetail> = ({
                                 <span>
                                   Date:{' '}
                                   {dayjs(
-                                    flightDetails[inx]?.Arrival?.date
+                                    flightDetails?.[inx]?.Arrival?.date
                                   ).format('D MMM, ddd')}
                                 </span>
                                 <span>
                                   Time:{' '}
-                                  {flightDetails[inx]?.Arrival?.time.slice(
+                                  {flightDetails?.[inx]?.Arrival?.time.slice(
                                     0,
                                     5
                                   )}
@@ -347,32 +495,124 @@ export const FlightBox: React.FC<FlightDetail> = ({
                         );
                       })}
                     </div>
+                  )} */}
+
+                  {showStops === catalog.id && direct > 1 && (
+                    <div
+                      className="absolute mt-4 z-20 bg-white rounded-xl shadow-lg border border-gray-200 w-[320px] md:w-[400px] p-4 text-gray-800 transition-all duration-300"
+                      onMouseOver={() => setShowStops(catalog.id)}
+                      onMouseOut={() => setShowStops('')}
+                    >
+                      <div className="space-y-4 max-h-fit overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                        {flightDetails?.slice(1)?.map((flight, inx) => (
+                          <div
+                            key={inx}
+                            className="relative flex flex-col gap-3 pb-3 border-b last:border-none border-gray-200"
+                          >
+                            {/* Stop Indicator */}
+                            {/* <div className="absolute -top-3 left-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded">
+                              Stop {inx + 1}
+                            </div> */}
+
+                            {/* Arrival from previous */}
+                            <div className="flex items-start gap-2">
+                              <span className="text-blue-500">🛬</span>
+                              <div>
+                                <p className="font-semibold">
+                                  Arrival From:{' '}
+                                  {flightDetails[inx]?.Departure?.location}
+                                </p>
+                                <p className="text-sm text-gray-500 flex justify-between">
+                                  <span>
+                                    {dayjs(
+                                      flightDetails?.[inx]?.Arrival?.date
+                                    ).format('D MMM, ddd')}
+                                  </span>
+                                  <span>
+                                    {flightDetails?.[inx]?.Arrival?.time.slice(
+                                      0,
+                                      5
+                                    )}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Departure */}
+                            <div className="flex items-start gap-2">
+                              <span className="text-green-500">✈️</span>
+                              <div>
+                                <p className="font-semibold">
+                                  Departure From: {flight?.Departure?.location}{' '}
+                                  → {flight?.Arrival?.location}
+                                </p>
+                                <p className="text-sm text-gray-500 flex justify-between">
+                                  <span>
+                                    {dayjs(flight?.Departure?.date).format(
+                                      'D MMM, ddd'
+                                    )}
+                                  </span>
+                                  <span>
+                                    {flight?.Departure?.time.slice(0, 5)}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Final Arrival */}
+                            <div className="flex items-start gap-2">
+                              <span className="text-red-500">📍</span>
+                              <div>
+                                <p className="font-semibold">
+                                  Arrival To: {flight.Arrival?.location}{' '}
+                                  {flight.Arrival?.terminal && (
+                                    <span className="text-sm text-gray-500">
+                                      (Terminal {flight.Arrival?.terminal})
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="text-sm text-gray-500 flex justify-between">
+                                  <span>
+                                    {dayjs(flight?.Arrival?.date).format(
+                                      'D MMM, ddd'
+                                    )}
+                                  </span>
+                                  <span>
+                                    {flight?.Arrival?.time.slice(0, 5)}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
 
                 {/* Arrival */}
                 <div className="flex flex-col items-center text-center">
                   <span className="text-base font-semibold text-gray-800">
-                    {flightDetails[direct - 1]?.Arrival?.time.slice(0, 5)}
+                    {flightDetails?.[direct - 1]?.Arrival?.time.slice(0, 5)}
                   </span>
                   <span className="text-xs text-gray-500">
                     {
-                      flightsData?.CatalogProductOfferingsResponse?.ReferenceList[0]?.Flight?.find(
+                      flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
                         (f: any) =>
                           f.id ===
-                          catalog?.ProductBrandOptions[0]?.flightRefs[
+                          (catalog?.ProductBrandOptions?.[0]?.flightRefs?.[
                             direct - 1
-                          ]
+                          ] || flightRefs[direct - 1])
                       )?.Arrival?.location
                     }{' '}
                     T
                     {
-                      flightsData?.CatalogProductOfferingsResponse?.ReferenceList[0]?.Flight?.find(
+                      flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
                         (f: any) =>
                           f.id ===
-                          catalog?.ProductBrandOptions[0]?.flightRefs[
+                          (catalog?.ProductBrandOptions?.[0]?.flightRefs?.[
                             direct - 1
-                          ]
+                          ] || flightRefs[direct - 1])
                       )?.Arrival?.terminal
                     }
                   </span>
@@ -382,8 +622,8 @@ export const FlightBox: React.FC<FlightDetail> = ({
                 <div className="text-primary font-bold flex items-center gap-1">
                   <IndianRupee className="w-4 h-4" />
                   {
-                    catalog?.ProductBrandOptions[0]?.ProductBrandOffering[0]
-                      ?.BestCombinablePrice?.PriceBreakdown[0]?.Amount?.Total
+                    catalog?.ProductBrandOptions?.[0]?.ProductBrandOffering?.[0]
+                      ?.BestCombinablePrice?.PriceBreakdown?.[0]?.Amount?.Total
                   }
                 </div>
 
@@ -392,7 +632,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
                   <Button
                     className="rounded-xl px-6 bg-[#BC1110] hover:bg-[#BC1110]/90 text-white"
                     onClick={() => {
-                      dialodData(catalog.id);
+                      dialogData(catalog.id);
                       setOpen(true);
                     }}
                   >

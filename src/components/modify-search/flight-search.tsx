@@ -248,7 +248,6 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
         }
       )
       .then((response) => {
-        console.log(response.data);
         // if (response.data?.CatalogProductOfferingsResponse?.Result?.Error) {
         //   // setCatalogProducts([]);
         //   // setBrands([]);
@@ -377,11 +376,10 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
         }
       )
       .then((response) => {
-        console.log(response.data);
-        if (response.data?.CatalogProductOfferingsResponse?.Result?.Error) {
-          return;
-          // throw Error('No Flights Found!');
-        }
+        // if (response.data?.CatalogProductOfferingsResponse?.Result?.Error) {
+        //   return;
+        //   // throw Error('No Flights Found!');
+        // }
         setFlightsData(response.data);
         // setCatalogProducts(
         //   response.data?.CatalogProductOfferingsResponse

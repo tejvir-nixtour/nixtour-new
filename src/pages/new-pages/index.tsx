@@ -16,7 +16,7 @@ export default function FlightPage() {
   const [filters, setFilters] = useState<any>({
     departureTimeRange: { start: '', end: '' },
     arrivalTimeRange: { start: '', end: '' },
-    priceRange: [0, 100000],
+    priceRange: [0, 1000000],
     stops: {
       nonStop: true,
       oneStop: true,

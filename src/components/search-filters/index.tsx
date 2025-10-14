@@ -50,7 +50,7 @@ export const FlightFilters: React.FC<FlightFiltersProps> = ({ setFilters }) => {
   //   directFlight: false,
   // });
 
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
   const [stops, setStops] = useState({
     nonStop: true,
     oneStop: true,
@@ -83,15 +83,15 @@ export const FlightFilters: React.FC<FlightFiltersProps> = ({ setFilters }) => {
         </h4>
         <Slider
           min={0}
-          max={100000}
-          step={100}
+          max={1000000}
+          step={500}
           className="bg-[#BC1110] hover:bg-[#BC1110]/90 text-[#BC1110]"
           value={priceRange}
           onValueChange={(val) => {
             setPriceRange(val as [number, number]);
             setFilters((previous) => ({
               ...previous,
-              priceRange: val as [number, number],
+              priceRange: [priceRange[0], priceRange[1]],
             }));
           }}
         />
