@@ -347,14 +347,14 @@ export default function FlightFareModal({
                                 key={i}
                                 title="CHGS MAY APPLY IF BAGS EXCEED TTL WT ALLOWANCE"
                               >
-                                {(bag?.BaggageItem?.[0]
-                                  ?.includedInOfferPrice === 'Yes' &&
-                                  bag?.BaggageItem?.[0]?.Measurement?.[0]
-                                    ?.value) ||
-                                bag?.BaggageItem?.[0]?.Measurement?.[0]
-                                  ?.value === 0
-                                  ? `${bag?.baggageType}: 1 X ${bag?.BaggageItem?.[0]?.Measurement?.[0]?.value} Kg`
-                                  : `${bag?.baggageType}: 1 X ${bag?.BaggageItem?.[0]?.Text?.split('AND')?.[0]}`}
+                                {bag?.BaggageItem?.[0]?.includedInOfferPrice ===
+                                  'Yes' &&
+                                bag?.BaggageItem?.[0]?.Measurement?.[0]?.value
+                                  ? `${bag?.baggageType}: ${bag?.BaggageItem?.[0]?.Measurement?.[0]?.value && bag?.BaggageItem?.[0]?.Measurement?.[0]?.value} Kg`
+                                  : /^(?=.*\d).+$/.test(
+                                      bag?.BaggageItem?.[0]?.Text
+                                    ) &&
+                                    `${bag?.baggageType}: ${bag?.BaggageItem?.[0]?.Text && bag?.BaggageItem?.[0]?.Text?.split('AND')?.[0]}`}
                               </p>
                             )
                           )}
@@ -414,11 +414,13 @@ export default function FlightFareModal({
                                                 option
                                                   ?.termsAndConditionsDetails?.[0]
                                                   ?.Penalties?.[0]?.Change?.[0]
-                                                  ?.PenaltyAppliesTo &&
-                                                option
-                                                  ?.termsAndConditionsDetails?.[0]
-                                                  ?.Penalties?.[0]?.Change?.[0]
                                                   ?.PenaltyAppliesTo
+                                                  ? option
+                                                      ?.termsAndConditionsDetails?.[0]
+                                                      ?.Penalties?.[0]
+                                                      ?.Change?.[0]
+                                                      ?.PenaltyAppliesTo
+                                                  : ''
                                               }`
                                             ) : (
                                               <>
@@ -455,12 +457,13 @@ export default function FlightFareModal({
                                                         ?.termsAndConditionsDetails?.[0]
                                                         ?.Penalties?.[0]
                                                         ?.Cancel?.[0]
-                                                        ?.PenaltyAppliesTo &&
-                                                      option
-                                                        ?.termsAndConditionsDetails?.[0]
-                                                        ?.Penalties?.[0]
-                                                        ?.Cancel?.[0]
                                                         ?.PenaltyAppliesTo
+                                                        ? option
+                                                            ?.termsAndConditionsDetails?.[0]
+                                                            ?.Penalties?.[0]
+                                                            ?.Cancel?.[0]
+                                                            ?.PenaltyAppliesTo
+                                                        : ''
                                                     }`
                                                   : `${f?.classification}`}
                                               </>

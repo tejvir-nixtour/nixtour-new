@@ -1,25 +1,93 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlightDetail } from './types';
-import { IndianRupee } from 'lucide-react';
+import { ChevronRight, IndianRupee, Plane } from 'lucide-react';
 import { Button } from '../ui/button';
 import dayjs from 'dayjs';
 import FlightFareModal from '../flight-model';
 import { airLines } from '../search-filters/filterOptions';
 
+import { FlightDetailsDialog } from '../flight-details-model';
+
 export const FlightBox: React.FC<FlightDetail> = ({
   filters,
-  // catalogProducts,
-  // flights,
-  // brands,
+  airlines,
   flightsData,
-  // termsAndConditions,
-  // products,
 }) => {
   const [showStops, setShowStops] = useState<string>('');
   const [selectedFlight, setSelectedFlight] = useState<any[] | null>(null);
   const [open, setOpen] = useState<boolean>(false);
 
-  console.log(flightsData);
+  const [flightDialogData, setFlightDialogData] = useState<any>(null);
+  const [showFlightDetails, setShowFlightDetails] = useState<boolean>(false);
+
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 450);
+
+  const sample = {
+    currency: '₹',
+    totalFare: 65904,
+    taxes: 36824,
+    segments: [
+      {
+        airline: 'Qatar Airways',
+        flightNo: 'QR-573',
+        aircraft: 'Airbus A350-1000',
+        departure: {
+          airport: 'Bangalore (BLR)',
+          code: 'BLR',
+          date: '2025-10-16',
+          time: '04:00:00',
+        },
+        arrival: {
+          airport: 'Doha (DOH)',
+          code: 'DOH',
+          date: '2025-10-16',
+          time: '05:50:00',
+        },
+        durationMinutes: 260,
+        meal: 'Free Meal',
+        notes: ['Change plane at Doha (DOH), Connecting Time: 2h 10m'],
+      },
+      {
+        airline: 'Qatar Airways',
+        flightNo: 'QR-739',
+        aircraft: 'Airbus A350-1000',
+        departure: {
+          airport: 'Doha (DOH)',
+          code: 'DOH',
+          date: '2025-10-16',
+          time: '08:00:00',
+        },
+        arrival: {
+          airport: 'Los Angeles (LAX)',
+          code: 'LAX',
+          date: '2025-10-16',
+          time: '14:00:00',
+        },
+        durationMinutes: 960,
+        meal: 'Free Meal',
+        notes: [
+          'Change plane at Los Angeles (LAX), Connecting Time: 3h 17m — Connecting flight may depart from a different terminal',
+        ],
+      },
+    ],
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 450);
+    };
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Run once on mount in case screen size changed before component loaded
+    handleResize();
+
+    // Cleanup listener on unmount
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // console.log(flightsData);
 
   const formatTimeToMinutes = (time: string) => {
     const [hour, min] = time.split(':').map(Number);
@@ -111,7 +179,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
     setSelectedFlight(flightDetails);
   }
 
-  console.log(filters);
+  // console.log(filters);
 
   const filteredCatalog =
     flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings?.CatalogProductOffering?.filter(
@@ -319,13 +387,13 @@ export const FlightBox: React.FC<FlightDetail> = ({
       }
     );
 
-  console.log('filteredCatalogs', filteredCatalog.length);
+  // console.log('filteredCatalogs', filteredCatalog.length);
 
   const filteredCatalogs = filteredCatalog;
   // flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings
   //   ?.CatalogProductOffering;
 
-  console.log('Total', filteredCatalogs?.length);
+  // console.log('Total', filteredCatalogs?.length);
   return (
     <div className="flex flex-col my-6 md:my-10 items-center gap-4 w-full md:w-[60%]">
       {filteredCatalogs?.length ? (
@@ -383,33 +451,47 @@ export const FlightBox: React.FC<FlightDetail> = ({
             }
           );
 
+          let ImageName: string =
+            airlines?.find((airline: any) => {
+              return airline?.IataCode === flightDetails?.[0]?.carrier;
+            })?.ImageUrl || '';
+
           return (
             <div
               key={catalog.id}
               className="w-full max-w-[90dvw] rounded-xl border bg-white shadow-sm hover:shadow-md transition p-4 flex flex-col gap-4 sm:flex-row sm:items-center"
             >
               {/* Airline Info */}
-              <div className="flex flex-row md:flex-col items-center md:items-start gap-1 min-w-[120px]">
-                <span className="text-sm font-medium text-gray-900">
+              <div className="flex flex-row sm:flex-col md:max-w-24 items-center md:items-start gap-1 md:min-w-[120px]">
+                {ImageName ? (
+                  <img
+                    src={`https://api.nixtour.com/api/Image/GetImage/${ImageName}`}
+                    alt={ImageName}
+                    className="w-20 object-contain object-center md:object-left p-0 -my-4 bg-white"
+                  />
+                ) : (
+                  <Plane className="h-7" />
+                )}
+                <span className="text-[12px] font-semibold md:text-sm text-gray-900">
                   {airLines.find(
                     (airline) => airline.code === flightDetails?.[0]?.carrier
                   )?.name ||
                     flightDetails?.[0]?.operatingCarrierName ||
                     flightDetails?.[0]?.carrier}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                {/* <span className="text-[12px] md:text-xs text-muted-foreground">
                   {flightDetails?.[0]?.carrier}-{flightDetails?.[0]?.number}
-                </span>
+                </span> */}
               </div>
 
               {/* Flight Info */}
               <div className="flex flex-1 justify-between items-center flex-wrap gap-3">
                 {/* Departure */}
                 <div className="flex flex-col items-center text-center">
-                  <span className="text-base font-semibold text-gray-800">
+                  <span className="text-[14px] md:text-base font-semibold text-gray-900">
                     {flightDetails?.[0]?.Departure?.time.slice(0, 5)}
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-[10px] md:text-xs text-gray-500">
                     {flightDetails?.[0]?.Departure?.location} T
                     {flightDetails?.[0]?.Departure?.terminal || 0}
                   </span>
@@ -417,10 +499,12 @@ export const FlightBox: React.FC<FlightDetail> = ({
 
                 {/* Duration & Stops */}
                 <div className="flex flex-col items-center text-center gap-1">
-                  <span className="text-xs text-gray-500">{duration}</span>
-                  <div className="w-20 h-[4px] bg-gray-500 rounded-full" />
+                  <span className="text-[11px] md:text-xs text-gray-500">
+                    {duration}
+                  </span>
+                  <div className="w-16 md:w-20 h-[2px] md:h-[4px] bg-gray-500 rounded-full" />
                   <span
-                    className="text-xs text-gray-600 cursor-pointer"
+                    className="text-[11px] md:text-xs text-gray-600 cursor-pointer"
                     onMouseOver={() => setShowStops(catalog.id)}
                     onMouseOut={() => setShowStops('')}
                   >
@@ -499,30 +583,44 @@ export const FlightBox: React.FC<FlightDetail> = ({
 
                   {showStops === catalog.id && direct > 1 && (
                     <div
-                      className="absolute mt-4 z-20 bg-white rounded-xl shadow-lg border border-gray-200 w-[320px] md:w-[400px] p-4 text-gray-800 transition-all duration-300"
+                      className="absolute mt-7 translate-x-24 md:translate-x-0 z-20 bg-white rounded-xl shadow-lg border border-gray-200 p-4 text-gray-800 transition-all duration-300"
                       onMouseOver={() => setShowStops(catalog.id)}
                       onMouseOut={() => setShowStops('')}
                     >
                       <div className="space-y-4 max-h-fit overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                        {flightDetails?.slice(1)?.map((flight, inx) => (
+                        {flightDetails?.slice(0, -1)?.map((flight, inx) => (
                           <div
                             key={inx}
-                            className="relative flex flex-col gap-3 pb-3 border-b last:border-none border-gray-200"
+                            className="relative flex flex-col gap-3 pb-3 last:pb-0 border-b last:border-none border-gray-200 w-max"
                           >
-                            {/* Stop Indicator */}
-                            {/* <div className="absolute -top-3 left-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded">
-                              Stop {inx + 1}
-                            </div> */}
+                            <div className="flex items-start justify-between gap-4 w-full">
+                              {/* Stop Indicator */}
+                              <div className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded w-fit">
+                                Stop {inx + 1}
+                              </div>
 
-                            {/* Arrival from previous */}
-                            <div className="flex items-start gap-2">
-                              <span className="text-blue-500">🛬</span>
-                              <div>
-                                <p className="font-semibold">
-                                  Arrival From:{' '}
-                                  {flightDetails[inx]?.Departure?.location}
-                                </p>
-                                <p className="text-sm text-gray-500 flex justify-between">
+                              {/* Arrival from previous */}
+                              <div className="w-fit">
+                                <div>
+                                  <p className="font-semibold inline-block">
+                                    {/* Arrival From:{' '}
+                                  {flightDetails[inx]?.Departure?.location} */}
+                                    Stop Over at {flight?.Arrival?.location} for{' '}
+                                    {calculateTimeDifference(
+                                      {
+                                        date: flight?.Arrival?.date,
+                                        time: flight.Arrival?.time?.slice(0, 5),
+                                      },
+                                      {
+                                        date: flightDetails?.[inx + 1]
+                                          ?.Departure?.date,
+                                        time: flightDetails?.[
+                                          inx + 1
+                                        ]?.Departure?.time?.slice(0, 5),
+                                      }
+                                    )}
+                                  </p>
+                                  {/* <p className="text-sm text-gray-500 flex justify-between">
                                   <span>
                                     {dayjs(
                                       flightDetails?.[inx]?.Arrival?.date
@@ -534,12 +632,12 @@ export const FlightBox: React.FC<FlightDetail> = ({
                                       5
                                     )}
                                   </span>
-                                </p>
+                                </p> */}
+                                </div>
                               </div>
                             </div>
-
                             {/* Departure */}
-                            <div className="flex items-start gap-2">
+                            {/* <div className="flex items-start gap-2">
                               <span className="text-green-500">✈️</span>
                               <div>
                                 <p className="font-semibold">
@@ -557,10 +655,10 @@ export const FlightBox: React.FC<FlightDetail> = ({
                                   </span>
                                 </p>
                               </div>
-                            </div>
+                            </div> */}
 
                             {/* Final Arrival */}
-                            <div className="flex items-start gap-2">
+                            {/* <div className="flex items-start gap-2">
                               <span className="text-red-500">📍</span>
                               <div>
                                 <p className="font-semibold">
@@ -582,7 +680,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
                                   </span>
                                 </p>
                               </div>
-                            </div>
+                            </div> */}
                           </div>
                         ))}
                       </div>
@@ -592,10 +690,10 @@ export const FlightBox: React.FC<FlightDetail> = ({
 
                 {/* Arrival */}
                 <div className="flex flex-col items-center text-center">
-                  <span className="text-base font-semibold text-gray-800">
+                  <span className="text-[14px] md:text-base font-semibold text-gray-900">
                     {flightDetails?.[direct - 1]?.Arrival?.time.slice(0, 5)}
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-[10px] md:text-xs text-gray-500">
                     {
                       flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
                         (f: any) =>
@@ -619,7 +717,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
                 </div>
 
                 {/* Price */}
-                <div className="text-primary font-bold flex items-center gap-1">
+                <div className="text-primary font-bold flex items-center justify-center">
                   <IndianRupee className="w-4 h-4" />
                   {
                     catalog?.ProductBrandOptions?.[0]?.ProductBrandOffering?.[0]
@@ -628,15 +726,24 @@ export const FlightBox: React.FC<FlightDetail> = ({
                 </div>
 
                 {/* CTA */}
-                <div>
+                <div className="flex lg:flex-col gap-2">
                   <Button
-                    className="rounded-xl px-6 bg-[#BC1110] hover:bg-[#BC1110]/90 text-white"
+                    className="rounded-xl md:px-6 px-2 bg-blue-600 hover:bg-blue-800 text-white"
+                    onClick={() => {
+                      setFlightDialogData(sample);
+                      setShowFlightDetails(true);
+                    }}
+                  >
+                    {isMobile ? <ChevronRight /> : `Details`}
+                  </Button>
+                  <Button
+                    className="rounded-xl md:px-6 px-2 bg-[#BC1110] hover:bg-[#BC1110]/90 text-white"
                     onClick={() => {
                       dialogData(catalog.id);
                       setOpen(true);
                     }}
                   >
-                    Select
+                    {isMobile ? <ChevronRight /> : `Select`}
                   </Button>
                 </div>
               </div>
@@ -654,6 +761,12 @@ export const FlightBox: React.FC<FlightDetail> = ({
         open={open}
         onOpenChange={setOpen}
         flight={selectedFlight}
+      />
+
+      <FlightDetailsDialog
+        open={showFlightDetails}
+        onOpenChange={setShowFlightDetails}
+        data={flightDialogData}
       />
     </div>
   );

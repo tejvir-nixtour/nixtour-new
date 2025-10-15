@@ -406,7 +406,7 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {}, []);
+  if (loading) console.log(loading);
 
   // handleHelmetTitle
 
@@ -421,7 +421,7 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
   return (
     <>
       {/* Search Form */}
-      <div className="p-3 xs:p-4 relative z-2 max-w-7xl mx-auto">
+      <div className="p-3 xs:p-4 relative z-2 max-w-[93dvw] md:max-w-7xl mx-auto">
         <div className="mx-auto rounded-2xl bg-white p-4 xs:p-6 shadow-xl border border-white/30">
           <form
             className="space-y-4 xs:space-y-8"
@@ -767,9 +767,9 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
           </div>
         </Modal>
       </div>
-      {loading && (
+      {/* {loading && (
         <h1 className="text-center mt-10 text-5xl absolute">Loading...</h1>
-      )}
+      )} */}
     </>
   );
 };

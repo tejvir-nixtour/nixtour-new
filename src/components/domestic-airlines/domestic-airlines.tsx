@@ -25,8 +25,9 @@ const CustomArrow: React.FC<ArrowProps> = ({
   if (!isVisible) return null;
   return (
     <button
-      className={`absolute top-1/2 transform -translate-y-1/2 z-10 ${arrowType === 'prev' ? 'left-[-20px]' : 'right-[-20px]'
-        } bg-white text-black rounded-full shadow-md hover:shadow-lg focus:outline-none p-3`}
+      className={`absolute top-1/2 transform -translate-y-1/2 z-10 ${
+        arrowType === 'prev' ? 'left-[-20px]' : 'right-[-20px]'
+      } bg-white text-black rounded-full shadow-md hover:shadow-lg focus:outline-none p-3`}
       onClick={onClick}
       aria-label={arrowType === 'prev' ? 'Previous Slide' : 'Next Slide'}
     >
@@ -73,7 +74,8 @@ const DomesticAirlines: React.FC<DomesticAirlinesProps> = ({ airlines }) => {
         setItemWidth(containerWidth / visibleItems);
 
         // Check if content is wider than container
-        const isContentWider = sliderRef.current.scrollWidth > sliderRef.current.clientWidth;
+        const isContentWider =
+          sliderRef.current.scrollWidth > sliderRef.current.clientWidth;
         setShowRightArrow(isContentWider);
       }
     };
@@ -138,7 +140,9 @@ const DomesticAirlines: React.FC<DomesticAirlinesProps> = ({ airlines }) => {
   return (
     <div className="mx-auto py-4 sm:px-3">
       <h2 className="text-2xl font-semibold mb-4">
-        {location.pathname === '/b2bagents' ? 'Special Flight Deals' : 'Popular Domestic Airlines'}
+        {location.pathname === '/b2bagents'
+          ? 'Special Flight Deals'
+          : 'Popular Domestic Airlines'}
       </h2>
       <div className="relative px-8">
         <CustomArrow
@@ -155,9 +159,7 @@ const DomesticAirlines: React.FC<DomesticAirlinesProps> = ({ airlines }) => {
             <div
               key={airline.AirlineId}
               className="px-2 my-2"
-              onClick={() =>
-                handleAirlineClick(airline.AirlineName)
-              }
+              onClick={() => handleAirlineClick(airline.AirlineName)}
             >
               <div className="relative aspect-[28/37] w-[180px] rounded-[300px] bg-white shadow-lg overflow-hidden group cursor-pointer flex flex-col items-center justify-center">
                 <img
