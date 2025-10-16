@@ -22,56 +22,6 @@ export const FlightBox: React.FC<FlightDetail> = ({
 
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 450);
 
-  const sample = {
-    currency: '₹',
-    totalFare: 65904,
-    taxes: 36824,
-    segments: [
-      {
-        airline: 'Qatar Airways',
-        flightNo: 'QR-573',
-        aircraft: 'Airbus A350-1000',
-        departure: {
-          airport: 'Bangalore (BLR)',
-          code: 'BLR',
-          date: '2025-10-16',
-          time: '04:00:00',
-        },
-        arrival: {
-          airport: 'Doha (DOH)',
-          code: 'DOH',
-          date: '2025-10-16',
-          time: '05:50:00',
-        },
-        durationMinutes: 260,
-        meal: 'Free Meal',
-        notes: ['Change plane at Doha (DOH), Connecting Time: 2h 10m'],
-      },
-      {
-        airline: 'Qatar Airways',
-        flightNo: 'QR-739',
-        aircraft: 'Airbus A350-1000',
-        departure: {
-          airport: 'Doha (DOH)',
-          code: 'DOH',
-          date: '2025-10-16',
-          time: '08:00:00',
-        },
-        arrival: {
-          airport: 'Los Angeles (LAX)',
-          code: 'LAX',
-          date: '2025-10-16',
-          time: '14:00:00',
-        },
-        durationMinutes: 960,
-        meal: 'Free Meal',
-        notes: [
-          'Change plane at Los Angeles (LAX), Connecting Time: 3h 17m — Connecting flight may depart from a different terminal',
-        ],
-      },
-    ],
-  };
-
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 450);
@@ -121,7 +71,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
     return `${hours}H ${minutes}M`;
   }
 
-  function dialogData(id: string) {
+  function getFlightDetails(id: any) {
     const flightDetails: any[] = [];
 
     const catalogProduct =
@@ -175,6 +125,12 @@ export const FlightBox: React.FC<FlightDetail> = ({
         });
       });
     });
+
+    return flightDetails;
+  }
+
+  function dialogData(id: string) {
+    const flightDetails = getFlightDetails(id);
 
     setSelectedFlight(flightDetails);
   }
@@ -387,7 +343,12 @@ export const FlightBox: React.FC<FlightDetail> = ({
       }
     );
 
-  // console.log('filteredCatalogs', filteredCatalog.length);
+  console.log(
+    'Total',
+    flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings
+      ?.CatalogProductOffering?.length
+  );
+  console.log('filteredCatalogs', filteredCatalog.length);
 
   const filteredCatalogs = filteredCatalog;
   // flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings
@@ -730,7 +691,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
                   <Button
                     className="rounded-xl md:px-6 px-2 bg-blue-600 hover:bg-blue-800 text-white"
                     onClick={() => {
-                      setFlightDialogData(sample);
+                      setFlightDialogData(getFlightDetails(catalog.id));
                       setShowFlightDetails(true);
                     }}
                   >
@@ -767,6 +728,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
         open={showFlightDetails}
         onOpenChange={setShowFlightDetails}
         data={flightDialogData}
+        airlines={airlines}
       />
     </div>
   );

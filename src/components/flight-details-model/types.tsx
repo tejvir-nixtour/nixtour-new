@@ -11,14 +11,16 @@ export type Segment = {
 };
 
 export type FlightDetails = {
-  segments: Segment[];
-  totalFare?: number;
-  taxes?: number;
-  currency?: string;
+  brandDetails: any[];
+  flightDetails?: any[];
+  priceDetails?: any;
+  productDetails?: any[];
+  termsAndConditionsDetails?: any[];
 };
 
 export interface FlightDetailsDialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  data: FlightDetails;
+  data: FlightDetails[];
+  airlines?: any[];
 }

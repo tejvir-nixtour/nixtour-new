@@ -267,7 +267,7 @@ export default function FlightFareModal({
     // </Dialog>
 
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="md:max-w-6xl bg-white md:rounded-2xl sm:rounded-2xl sm:max-h-[90dvh] p-6 md:max-h-[100dvh] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none]">
+      <DialogContent className="md:max-w-6xl bg-white sm:rounded-2xl rounded-2xl max-h-[90dvh] p-6 md:max-h-[100dvh] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
             <span className="inline-flex flex-wrap items-center gap-1">
