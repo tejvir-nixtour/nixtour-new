@@ -38,6 +38,74 @@ export default function FlightPage() {
 
   const location = useLocation();
 
+  const airlineSpecificData: {
+    id?: string;
+    direct?: number;
+    price?: number;
+    airline?: string;
+    airlineCode?: string;
+  }[] = [];
+
+  // finding cheap flights from each airline for every stops
+
+  flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings?.CatalogProductOffering?.forEach(
+    (catalog: any) => {
+      const flightRefs: any[] = [];
+      flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[1]?.Product?.map(
+        (p: any) => {
+          if (
+            p?.id ===
+            catalog?.ProductBrandOptions?.[0]?.ProductBrandOffering?.[0]
+              ?.Product?.[0]?.productRef
+          ) {
+            p?.FlightSegment?.map((f: any) => {
+              flightRefs.push(f?.Flight?.FlightRef);
+            });
+          }
+        }
+      );
+      const direct =
+        catalog?.ProductBrandOptions?.[0]?.flightRefs?.length ||
+        flightRefs?.length ||
+        1;
+
+      const airline =
+        flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
+          (fl: any) => flightRefs?.[0] === fl?.id
+        )?.operatingCarrierName;
+
+      const airlineCode =
+        flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
+          (fl: any) => flightRefs?.[0] === fl?.id
+        )?.operatingCarrier ||
+        flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[0]?.Flight?.find(
+          (fl: any) => flightRefs?.[0] === fl?.id
+        )?.carrier;
+
+      const price =
+        catalog?.ProductBrandOptions?.[0]?.ProductBrandOffering?.[0]
+          ?.BestCombinablePrice?.TotalPrice;
+
+      const id = catalog?.id;
+
+      if (
+        !airlineSpecificData?.find(
+          (air: any) =>
+            air?.direct === direct && air.airlineCode === airlineCode
+        )
+      )
+        airlineSpecificData.push({
+          id,
+          direct,
+          price,
+          airline,
+          airlineCode,
+        });
+    }
+  );
+
+  console.log('Airline Specific Data', airlineSpecificData);
+
   return (
     <div className="min-h-[60dvw] overflow-x-hidden">
       <Navbar />
@@ -61,7 +129,7 @@ export default function FlightPage() {
           <FlightBox
             filters={filters}
             airlines={airlines}
-            // flights={flights}
+            airlineSpecificData={airlineSpecificData}
             flightsData={flightsData}
             // catalogProducts={catalogProducts}
             // products={products}

@@ -8,10 +8,21 @@ import { airLines } from '../search-filters/filterOptions';
 
 import { FlightDetailsDialog } from '../flight-details-model';
 
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../components/ui/table';
+
 export const FlightBox: React.FC<FlightDetail> = ({
   filters,
   airlines,
   flightsData,
+  airlineSpecificData,
 }) => {
   const [showStops, setShowStops] = useState<string>('');
   const [selectedFlight, setSelectedFlight] = useState<any[] | null>(null);
@@ -134,6 +145,8 @@ export const FlightBox: React.FC<FlightDetail> = ({
 
     setSelectedFlight(flightDetails);
   }
+
+  console.log(flightsData);
 
   // console.log(filters);
 
@@ -357,6 +370,98 @@ export const FlightBox: React.FC<FlightDetail> = ({
   // console.log('Total', filteredCatalogs?.length);
   return (
     <div className="flex flex-col my-6 md:my-10 items-center gap-4 w-full md:w-[60%]">
+      <div className="mb-5 w-full overflow-y-hidden scrollbar-hide hide-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] rounded-2xl sm:rounded-2xl border">
+        <div className="max-w-[90dvw] mx-auto">
+          {' '}
+          {/* max-h-36*/}
+          <Table className="w-full h-fit">
+            {/* mb-4  [scrollbar-width:none] [-ms-overflow-style:none] sm:[scrollbar-width:thin] sm:[-ms-overflow-style:thin*/}
+            <TableCaption className="m-0">
+              {/* A list of airlines with stops and price. */}
+            </TableCaption>
+
+            <TableHeader>
+              <TableRow className="hover:bg-white">
+                <TableHead className="font-medium text-white bg-gray-500 border-b-slate-200 sticky left-0">
+                  Summary
+                </TableHead>
+                {airlineSpecificData?.map((air, i) => (
+                  <TableHead
+                    key={i}
+                    className="text-left whitespace-nowrap border border-r-1"
+                  >
+                    <span className="">
+                      {airlines?.find((a: any) => {
+                        return a?.IataCode === air?.airlineCode;
+                      })?.ImageUrl ? (
+                        <img
+                          src={`https://api.nixtour.com/api/Image/GetImage/${
+                            airlines?.find((a: any) => {
+                              return a?.IataCode === air?.airlineCode;
+                            })?.ImageUrl
+                          }`}
+                          alt={
+                            airlines?.find((a: any) => {
+                              return a?.IataCode === air?.airlineCode;
+                            })?.ImageUrl
+                          }
+                          className="h-20 object-contain object-center"
+                        />
+                      ) : (
+                        <Plane className="w-6 h-6 text-blue-700 bg-white border-0" />
+                      )}
+                    </span>
+                    <span className="text-[10px] font-medium uppercase text-gray-500 tracking-wide">
+                      {air?.airline ||
+                        airlines?.find(
+                          (airline) => airline?.IataCode === air?.airlineCode
+                        )?.AirlineName ||
+                        air?.airlineCode}
+                    </span>
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {['NonStop', '1 Stop', '2+ Stops'].map((stops, i) => (
+                <TableRow key={i}>
+                  <TableCell className="font-medium text-white bg-gray-500 border-gray-500 border-b-slate-200 sticky left-0">
+                    {stops}
+                  </TableCell>
+                  {airlineSpecificData?.map((air, j) => (
+                    <TableCell key={j} className="text-xs border">
+                      {i === air.direct - 1 ? air?.price : '-'}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Hide scrollbar cross-browser */}
+        <style>{`
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+          .scrollbar-hide {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+          }
+
+          /* Hide scrollbar but allow scrolling */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+        `}</style>
+      </div>
+
       {filteredCatalogs?.length ? (
         filteredCatalogs.map((catalog: any) => {
           const flightRefs: any[] = [];
@@ -414,7 +519,11 @@ export const FlightBox: React.FC<FlightDetail> = ({
 
           let ImageName: string =
             airlines?.find((airline: any) => {
-              return airline?.IataCode === flightDetails?.[0]?.carrier;
+              return (
+                airline?.IataCode ===
+                (flightDetails?.[0]?.operatingCarrier ||
+                  flightDetails?.[0]?.carrier)
+              );
             })?.ImageUrl || '';
 
           return (
@@ -434,10 +543,13 @@ export const FlightBox: React.FC<FlightDetail> = ({
                   <Plane className="h-7" />
                 )}
                 <span className="text-[12px] font-semibold md:text-sm text-gray-900">
-                  {airLines.find(
-                    (airline) => airline.code === flightDetails?.[0]?.carrier
-                  )?.name ||
-                    flightDetails?.[0]?.operatingCarrierName ||
+                  {flightDetails?.[0]?.operatingCarrierName ||
+                    airLines.find(
+                      (airline) =>
+                        airline.code ===
+                        (flightDetails?.[0]?.operatingCarrier ||
+                          flightDetails?.[0]?.carrier)
+                    )?.name ||
                     flightDetails?.[0]?.carrier}
                 </span>
                 {/* <span className="text-[12px] md:text-xs text-muted-foreground">

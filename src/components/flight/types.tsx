@@ -13,6 +13,7 @@ export interface FlightDetail {
     directFlight: boolean;
   };
   flights?: any[];
+  airlineSpecificData?: any[];
   airlines?: any[];
   flightsData?: any;
   catalogProducts?: any[];

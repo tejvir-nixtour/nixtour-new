@@ -11,6 +11,7 @@ import { Plane } from 'lucide-react';
 
 import { FlightDetailsDialogProps } from './types';
 import dayjs from 'dayjs';
+import { ShareScreenshot } from '../share-screenshot';
 
 // Helpers
 const formatTime = (str: string) => str.slice(0, 5); // expect HH:MM:SS
@@ -64,135 +65,138 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
           We include a visually-hidden DialogTitle via the DialogHeader component.
           The visible heading further down is kept for visual layout. */}
       <DialogContent className="bg-white max-w-5xl gap-0 w-[95vw] md:w-[90vw] lg:w-[1100px] p-0 rounded-2xl sm:rounded-2xl overflow-hidden">
-        <DialogHeader>
-          {/* visually hidden title to satisfy accessibility requirements */}
-          <DialogTitle className="sr-only">Flight Details</DialogTitle>
-        </DialogHeader>
+        <div id="flight-details" className=" h-fit w-fit">
+          <DialogHeader>
+            {/* visually hidden title to satisfy accessibility requirements */}
+            <DialogTitle className="sr-only">Flight Details</DialogTitle>
+          </DialogHeader>
 
-        <div className="flex flex-col md:flex-row max-h-[90dvh] md:min-h-[60vh] overflow-y-scroll [scrollbar-width:none] [-ms-overflow-style:none]">
-          {/* Left - Flight timeline/details */}
-          <div className="flex-1 p-6 pr-3 md:mx-0 md:p-6 md:pr-0 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] min-h-[40dvh]">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">Flight Details</h3>
-                <p className="text-sm text-muted-foreground">
-                  Review segments, times and connection notes
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* <Button
+          <div className="flex flex-col md:flex-row max-h-[90dvh] md:min-h-[60vh] overflow-y-scroll [scrollbar-width:none] [-ms-overflow-style:none]">
+            {/* Left - Flight timeline/details */}
+            <div className="flex-1 p-6 pr-3 md:mx-0 md:p-6 md:pr-0 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] min-h-[40dvh] max-h-[70dvh]">
+              <div className="flex items-start justify-between">
+                <div id="flight-dialog-title">
+                  <h3 className="text-lg font-semibold">Flight Details</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Review segments, times and connection notes
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onOpenChange(false)}
                 >
                   <X className="w-4 h-4" />
                 </Button> */}
+                </div>
               </div>
-            </div>
 
-            <ScrollArea className="mt-4 pr-4 w-full">
-              <ol className="space-y-6">
-                {data?.[0]?.flightDetails?.map((s, i) => (
-                  <li
-                    key={i}
-                    className="bg-white shadow-sm rounded-lg p-4 border"
-                  >
-                    <div className="flex flex-col md:justify-between gap-4">
-                      <div className="flex items-center gap-3 w-fit">
-                        <div className="rounded-md w-fit">
-                          {airlines?.find((airline: any) => {
-                            return (
-                              airline?.IataCode === s?.operatingCarrier ||
-                              airline?.IataCode === s?.carrier
-                            );
-                          })?.ImageUrl ? (
-                            <img
-                              src={`https://api.nixtour.com/api/Image/GetImage/${
-                                airlines?.find((airline: any) => {
-                                  return (
-                                    airline?.IataCode === s?.operatingCarrier ||
-                                    airline?.IataCode === s?.carrier
-                                  );
-                                })?.ImageUrl
-                              }`}
-                              alt={
-                                airlines?.find((airline: any) => {
-                                  return (
-                                    airline?.IataCode === s?.operatingCarrier ||
-                                    airline?.IataCode === s?.carrier
-                                  );
-                                })?.ImageUrl
-                              }
-                              className="h-20 object-contain object-center p-0 bg-white"
-                            />
-                          ) : (
-                            <Plane className="w-6 h-6 text-violet-700 bg-white border-0" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium">
-                            {/* {
+              <ScrollArea className="mt-4 pr-4 w-full">
+                <ol className="space-y-6">
+                  {data?.[0]?.flightDetails?.map((s, i) => (
+                    <li
+                      key={i}
+                      className="bg-white shadow-sm rounded-lg p-4 border"
+                    >
+                      <div className="flex flex-col md:justify-between gap-4">
+                        <div className="flex items-center gap-3 w-fit">
+                          <div className="rounded-md w-fit">
+                            {airlines?.find((airline: any) => {
+                              return (
+                                airline?.IataCode === s?.operatingCarrier ||
+                                airline?.IataCode === s?.carrier
+                              );
+                            })?.ImageUrl ? (
+                              <img
+                                src={`https://api.nixtour.com/api/Image/GetImage/${
+                                  airlines?.find((airline: any) => {
+                                    return (
+                                      airline?.IataCode ===
+                                        s?.operatingCarrier ||
+                                      airline?.IataCode === s?.carrier
+                                    );
+                                  })?.ImageUrl
+                                }`}
+                                alt={
+                                  airlines?.find((airline: any) => {
+                                    return (
+                                      airline?.IataCode ===
+                                        s?.operatingCarrier ||
+                                      airline?.IataCode === s?.carrier
+                                    );
+                                  })?.ImageUrl
+                                }
+                                className="h-20 object-contain object-center p-0 bg-white"
+                              />
+                            ) : (
+                              <Plane className="w-6 h-6 text-violet-700 bg-white border-0" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">
+                              {/* {
                               airLines.find(
                                 (airline) => airline.code === s?.carrier
                               )?.name
                             } */}
-                            {s?.operatingCarrierName ||
-                              airlines?.find((airline: any) => {
-                                return (
-                                  airline?.IataCode === s?.operatingCarrier ||
-                                  airline?.IataCode === s?.carrier
-                                );
-                              })?.AirlineName ||
-                              s?.operatingCarrier ||
-                              s?.carrier}{' '}
-                            • {s?.operatingCarrier || s?.carrier}-{s?.number}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {/* {s?.aircraft ?? 'Aircraft'} */}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-0 justify-between items-start w-full overflow-x-clip">
-                        <div className="">
-                          <div className="text-xs text-muted-foreground">
-                            Departure
-                          </div>
-                          <div className="text-sm font-semibold">
-                            {s?.Departure?.location}
-                            {s?.Departure?.terminal &&
-                              ` - Terminal ${s?.Departure?.terminal}`}
-                          </div>
-                          <div className="text-xs">
-                            {formatDate(s?.Departure?.date)} •{' '}
-                            {formatTime(s?.Departure?.time)}
-                          </div>
-                        </div>
-                        <div className="">
-                          <div className="text-xs text-muted-foreground">
-                            Arrival
-                          </div>
-                          <div className="text-sm font-semibold">
-                            {s?.Arrival?.location}{' '}
-                            {s?.Arrival?.terminal &&
-                              ` - Terminal ${s?.Arrival?.terminal}`}
-                          </div>
-                          <div className="text-xs">
-                            {formatDate(s?.Arrival?.date)} •{' '}
-                            {formatTime(s?.Arrival?.time)}
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <div>
+                              {s?.operatingCarrierName ||
+                                airlines?.find((airline: any) => {
+                                  return (
+                                    airline?.IataCode === s?.operatingCarrier ||
+                                    airline?.IataCode === s?.carrier
+                                  );
+                                })?.AirlineName ||
+                                s?.operatingCarrier ||
+                                s?.carrier}{' '}
+                              • {s?.operatingCarrier || s?.carrier}-{s?.number}
+                            </div>
                             <div className="text-xs text-muted-foreground">
-                              Duration
-                            </div>
-                            <div className="text-sm font-medium">
-                              {s?.duration?.slice(2)}
+                              {/* {s?.aircraft ?? 'Aircraft'} */}
                             </div>
                           </div>
                         </div>
-                        {/* <div className="text-left">
+
+                        <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-0 justify-between items-start w-full overflow-x-clip">
+                          <div className="">
+                            <div className="text-xs text-muted-foreground">
+                              Departure
+                            </div>
+                            <div className="text-sm font-semibold">
+                              {s?.Departure?.location}
+                              {s?.Departure?.terminal &&
+                                ` - Terminal ${s?.Departure?.terminal}`}
+                            </div>
+                            <div className="text-xs">
+                              {formatDate(s?.Departure?.date)} •{' '}
+                              {formatTime(s?.Departure?.time)}
+                            </div>
+                          </div>
+                          <div className="">
+                            <div className="text-xs text-muted-foreground">
+                              Arrival
+                            </div>
+                            <div className="text-sm font-semibold">
+                              {s?.Arrival?.location}{' '}
+                              {s?.Arrival?.terminal &&
+                                ` - Terminal ${s?.Arrival?.terminal}`}
+                            </div>
+                            <div className="text-xs">
+                              {formatDate(s?.Arrival?.date)} •{' '}
+                              {formatTime(s?.Arrival?.time)}
+                            </div>
+                          </div>
+                          <div className="flex items-center">
+                            <div>
+                              <div className="text-xs text-muted-foreground">
+                                Duration
+                              </div>
+                              <div className="text-sm font-medium">
+                                {s?.duration?.slice(2)}
+                              </div>
+                            </div>
+                          </div>
+                          {/* <div className="text-left">
                           <div className="text-xs text-muted-foreground">
                             Flexibility
                           </div>
@@ -218,129 +222,131 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
                               : '—'}
                           </div>
                         </div> */}
-                      </div>
-                    </div>
-
-                    {data?.[0]?.flightDetails?.length &&
-                      i < data?.[0]?.flightDetails?.length - 1 && (
-                        <div className="mt-3 text-xs text-muted-foreground bg-yellow-50 border border-yellow-100 rounded-md p-2 text-center">
-                          <p className="leading-tight">
-                            Stop Over at {s?.Arrival?.location} for{' '}
-                            {calculateTimeDifference(
-                              {
-                                time: s?.Arrival?.time?.slice(0, 5),
-                                date: s?.Arrival?.date,
-                              },
-                              {
-                                time: data?.[0]?.flightDetails?.[
-                                  i + 1
-                                ]?.Departure?.time?.slice(0, 5),
-                                date: data?.[0]?.flightDetails?.[i + 1]
-                                  ?.Departure?.date,
-                              }
-                            )}
-                          </p>
                         </div>
-                      )}
-                  </li>
-                ))}
-              </ol>
+                      </div>
 
-              {/* Important passenger note */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-md text-xs text-muted-foreground">
-                Passenger of all nationalities are advised to confirm with
-                respective embassies for all visa requirements. This
-                communication is for informational & general purposes only.
-              </div>
-            </ScrollArea>
-          </div>
+                      {data?.[0]?.flightDetails?.length &&
+                        i < data?.[0]?.flightDetails?.length - 1 && (
+                          <div className="mt-3 text-xs text-muted-foreground bg-yellow-50 border border-yellow-100 rounded-md p-2 text-center">
+                            <p className="leading-tight">
+                              Stop Over at {s?.Arrival?.location} for{' '}
+                              {calculateTimeDifference(
+                                {
+                                  time: s?.Arrival?.time?.slice(0, 5),
+                                  date: s?.Arrival?.date,
+                                },
+                                {
+                                  time: data?.[0]?.flightDetails?.[
+                                    i + 1
+                                  ]?.Departure?.time?.slice(0, 5),
+                                  date: data?.[0]?.flightDetails?.[i + 1]
+                                    ?.Departure?.date,
+                                }
+                              )}
+                            </p>
+                          </div>
+                        )}
+                    </li>
+                  ))}
+                </ol>
 
-          {/* Right - Fare Summary / Tabs */}
-          <div className="w-full md:w-[360px] h-full p-6 bg-blue-700 text-white flex flex-col border-0">
-            <div className="flex items-start justify-between">
-              <div>
-                <h4 className="text-lg font-semibold">Fare Summary</h4>
-                <p className="text-sm opacity-80">Summary & rules</p>
-              </div>
-              {/* <div className="text-sm text-white/80">
-                {data?.[0]?.priceDetails?.Base ?? '₹'}
-              </div> */}
+                {/* Important passenger note */}
+                <div className="mt-6 p-4 bg-gray-50 rounded-md text-xs text-muted-foreground">
+                  Passenger of all nationalities are advised to confirm with
+                  respective embassies for all visa requirements. This
+                  communication is for informational & general purposes only.
+                </div>
+              </ScrollArea>
             </div>
 
-            <div className="mt-6 flex-1">
-              <div className="bg-white/10 rounded-lg p-4">
-                <div className="flex items-center justify-between text-sm">
-                  <div>Base Fare</div>
-                  <div className="font-medium">
-                    {data?.[0]?.priceDetails?.CurrencyCode?.value
-                      ? data?.[0]?.priceDetails?.CurrencyCode?.value
-                      : '₹'}{' '}
-                    {data?.[0]?.priceDetails?.Base
-                      ? data?.[0]?.priceDetails?.Base
-                      : null}
-                    {/* // Math.round(data?.[0]?.priceDetails?.Base * 0.6) // : '—' */}
-                  </div>
+            {/* Right - Fare Summary / Tabs */}
+            <div className="w-full md:w-[360px] md:max-h-full p-6 bg-blue-700 text-white flex flex-col border-0">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="text-lg font-semibold">Fare Summary</h4>
+                  <p className="text-sm opacity-80">Summary & rules</p>
                 </div>
-                <div className="flex items-center justify-between text-sm mt-2">
-                  <div>Fees & Taxes</div>
-                  <div className="font-medium">
-                    {(data?.[0]?.priceDetails?.Fees?.TotalFees || 0) +
-                    (data?.[0]?.priceDetails?.Taxes?.TotalTaxes || 0)
-                      ? `${
-                          data?.[0]?.priceDetails?.CurrencyCode?.value
-                            ? data?.[0]?.priceDetails?.CurrencyCode?.value
-                            : '₹'
-                        } ${
-                          (data?.[0]?.priceDetails?.Fees?.TotalFees || 0) +
-                          (data?.[0]?.priceDetails?.Taxes?.TotalTaxes || 0)
-                        }`
-                      : '—'}
-                  </div>
-                </div>
-                <hr className="my-3 border-white/20" />
-                <div className="flex items-center justify-between text-base font-semibold">
-                  <div>Total</div>
-                  <div>
-                    {data?.[0]?.priceDetails?.Total
-                      ? `${
-                          data?.[0]?.priceDetails?.CurrencyCode?.value
-                            ? data?.[0]?.priceDetails?.CurrencyCode?.value
-                            : '₹'
-                        } ${data?.[0]?.priceDetails?.Total}`
-                      : `${
-                          data?.[0]?.priceDetails?.CurrencyCode?.value
-                            ? data?.[0]?.priceDetails?.CurrencyCode?.value
-                            : '₹'
-                        } ${
-                          (data?.[0]?.priceDetails?.Fees?.TotalFees || 0) +
-                          (data?.[0]?.priceDetails?.Taxes?.TotalTaxes || 0) +
-                          (data?.[0]?.priceDetails?.Base || 0)
-                        }`}
-                  </div>
-                </div>
+                {/* <div className="text-sm text-white/80">
+                {data?.[0]?.priceDetails?.Base ?? '₹'}
+              </div> */}
               </div>
 
-              <div className="mt-4 space-y-3">
-                {/* <Button
+              <div className="mt-6 flex-1">
+                <div className="bg-white/10 rounded-lg p-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <div>Base Fare</div>
+                    <div className="font-medium">
+                      {data?.[0]?.priceDetails?.CurrencyCode?.value
+                        ? data?.[0]?.priceDetails?.CurrencyCode?.value
+                        : '₹'}{' '}
+                      {data?.[0]?.priceDetails?.Base
+                        ? data?.[0]?.priceDetails?.Base
+                        : null}
+                      {/* // Math.round(data?.[0]?.priceDetails?.Base * 0.6) // : '—' */}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-sm mt-2">
+                    <div>Fees & Taxes</div>
+                    <div className="font-medium">
+                      {(data?.[0]?.priceDetails?.Fees?.TotalFees || 0) +
+                      (data?.[0]?.priceDetails?.Taxes?.TotalTaxes || 0)
+                        ? `${
+                            data?.[0]?.priceDetails?.CurrencyCode?.value
+                              ? data?.[0]?.priceDetails?.CurrencyCode?.value
+                              : '₹'
+                          } ${
+                            (data?.[0]?.priceDetails?.Fees?.TotalFees || 0) +
+                            (data?.[0]?.priceDetails?.Taxes?.TotalTaxes || 0)
+                          }`
+                        : '—'}
+                    </div>
+                  </div>
+                  <hr className="my-3 border-white/20" />
+                  <div className="flex items-center justify-between text-base font-semibold">
+                    <div>Total</div>
+                    <div>
+                      {data?.[0]?.priceDetails?.Total
+                        ? `${
+                            data?.[0]?.priceDetails?.CurrencyCode?.value
+                              ? data?.[0]?.priceDetails?.CurrencyCode?.value
+                              : '₹'
+                          } ${data?.[0]?.priceDetails?.Total}`
+                        : `${
+                            data?.[0]?.priceDetails?.CurrencyCode?.value
+                              ? data?.[0]?.priceDetails?.CurrencyCode?.value
+                              : '₹'
+                          } ${
+                            (data?.[0]?.priceDetails?.Fees?.TotalFees || 0) +
+                            (data?.[0]?.priceDetails?.Taxes?.TotalTaxes || 0) +
+                            (data?.[0]?.priceDetails?.Base || 0)
+                          }`}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {/* <Button
                   className="w-full bg-[#BC1110] hover:bg-[#d60a0a] rounded-full"
                   onClick={() => onOpenChange(false)}
                 >
                   Book
                 </Button> */}
-                <Button variant="ghost" className="w-fit">
-                  Share
-                </Button>
+                  <Button variant="ghost" className="w-fit">
+                    Share
+                  </Button>
+                  <ShareScreenshot id={'flight-details'} />
+                </div>
               </div>
-            </div>
 
-            <div className="mt-4 text-xs opacity-90">
-              <div className="mb-2">
-                * Total fare displayed above has been rounded off and may thus
-                show a slight difference.
-              </div>
-              <div className="bg-white/5 p-2 rounded-md text-[12px]">
-                Deal — Get up to 19,000 off. Valid on all payment modes. Use
-                code: INSTALE. TnC apply
+              <div className="mt-4 text-xs opacity-90">
+                <div className="mb-2">
+                  * Total fare displayed above has been rounded off and may thus
+                  show a slight difference.
+                </div>
+                <div className="bg-white/5 p-2 rounded-md text-[12px]">
+                  Deal — Get up to 19,000 off. Valid on all payment modes. Use
+                  code: INSTALE. TnC apply
+                </div>
               </div>
             </div>
           </div>

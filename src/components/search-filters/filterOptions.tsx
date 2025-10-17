@@ -145,7 +145,7 @@ export const timeOptions = [
   },
   {
     label: 'After 6 PM',
-    value: { start: '18:00:00', end: '00:00:00' },
+    value: { start: '18:00:00', end: '24:00:00' },
     icon: '🌙',
   },
 ];
