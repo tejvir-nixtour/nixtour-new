@@ -194,7 +194,12 @@ export const ShareScreenshot: React.FC<SS> = ({ id }) => {
 
   return (
     <>
-      <Button onClick={captureScreenshot}>📸 Take Screenshot</Button>
+      <Button
+        onClick={captureScreenshot}
+        className="bg-[#BC1110] hover:bg-[#BC1110]/90 text-white rounded-full"
+      >
+        📸 Take Screenshot
+      </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-sm p-0 max-h-[90dvw] rounded-2xl sm:rounded-2xl overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none]">
@@ -210,11 +215,24 @@ export const ShareScreenshot: React.FC<SS> = ({ id }) => {
                 className="w-full rounded-lg border mb-4"
               />
               <div className="flex gap-2 justify-end flex-wrap">
-                <Button onClick={handleNativeShare}>Native Share</Button>
-                <Button variant="secondary" onClick={handleWhatsApp}>
+                <Button
+                  onClick={handleNativeShare}
+                  className="bg-[#BC1110] hover:bg-[#BC1110]/90 text-white rounded-full"
+                >
+                  Native Share
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={handleWhatsApp}
+                  className="hover:bg-[#BC1110]/90 hover:text-white rounded-full"
+                >
                   WhatsApp
                 </Button>
-                <Button variant="outline" onClick={handleEmail}>
+                <Button
+                  variant="outline"
+                  onClick={handleEmail}
+                  className="hover:bg-[#BC1110]/90 hover:text-white rounded-full"
+                >
                   Email
                 </Button>
               </div>

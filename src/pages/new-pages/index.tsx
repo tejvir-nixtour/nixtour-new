@@ -39,11 +39,12 @@ export default function FlightPage() {
   const location = useLocation();
 
   const airlineSpecificData: {
-    id?: string;
-    direct?: number;
-    price?: number;
-    airline?: string;
-    airlineCode?: string;
+    id: string;
+    direct: number;
+    price: [number, number, number];
+    currencyCode: string;
+    airline: string;
+    airlineCode: string;
   }[] = [];
 
   // finding cheap flights from each airline for every stops
@@ -82,35 +83,61 @@ export default function FlightPage() {
           (fl: any) => flightRefs?.[0] === fl?.id
         )?.carrier;
 
-      const price =
+      const newPrice =
         catalog?.ProductBrandOptions?.[0]?.ProductBrandOffering?.[0]
           ?.BestCombinablePrice?.TotalPrice;
 
+      const currencyCode =
+        catalog?.ProductBrandOptions?.[0]?.ProductBrandOffering?.[0]
+          ?.BestCombinablePrice?.CurrencyCode?.value || '₹';
+
       const id = catalog?.id;
 
-      if (
-        !airlineSpecificData?.find(
-          (air: any) =>
-            air?.direct === direct && air.airlineCode === airlineCode
-        )
-      )
-        airlineSpecificData.push({
-          id,
-          direct,
-          price,
-          airline,
-          airlineCode,
-        });
+      const exists = airlineSpecificData?.find(
+        (air: any) => air?.airlineCode === airlineCode
+      );
+
+      if (!exists) {
+        if (direct === 1)
+          airlineSpecificData.push({
+            id,
+            direct,
+            price: [newPrice, 0, 0],
+            airline,
+            airlineCode,
+            currencyCode,
+          });
+        else if (direct === 2)
+          airlineSpecificData.push({
+            id,
+            direct,
+            price: [0, newPrice, 0],
+            airline,
+            airlineCode,
+            currencyCode,
+          });
+        else
+          airlineSpecificData.push({
+            id,
+            direct,
+            price: [0, 0, newPrice],
+            airline,
+            airlineCode,
+            currencyCode,
+          });
+      } else {
+        if (direct <= 3) {
+          if (!exists.price[direct - 1]) exists.price[direct - 1] = newPrice;
+        } else if (!exists.price[2]) exists.price[2] = newPrice;
+      }
     }
   );
-
-  console.log('Airline Specific Data', airlineSpecificData);
 
   return (
     <div className="min-h-[60dvw] overflow-x-hidden">
       <Navbar />
 
-      <div className="bg-blue-600 h-fit w-full relative">
+      <div className="bg-blue-600 h-fit w-full relative flex justify-center">
         <ModifyFlight
           searchParams={location.state || {}}
           setFlightsData={setFlightsData}
@@ -139,15 +166,15 @@ export default function FlightPage() {
         </div>
       ) : (
         <div className="flex justify-between my-10 mx-auto px-10 overflow-hidden">
-          <div className="border rounded-2xl overflow-hidden py-5">
-            <Skeleton className="w-[95dvw] h-[20dvh] md:w-[40dvw] rounded-full" />
-            <Skeleton className="w-[95dvw] h-[20dvh] md:w-[40dvw] rounded-full" />
-            <Skeleton className="w-[95dvw] h-[20dvh] md:w-[40dvw] rounded-full" />
+          <div className="border rounded-2xl overflow-hidden p-5 w-fit">
+            <Skeleton className="w-[97dvw] h-[20dvh] md:w-[25dvw] rounded-full" />
+            <Skeleton className="w-[97dvw] h-[20dvh] md:w-[25dvw] rounded-full" />
+            <Skeleton className="w-[97dvw] h-[20dvh] md:w-[25dvw] rounded-full" />
           </div>
-          <div className="hidden md:inline-block border rounded-2xl overflow-hidden py-5">
-            <Skeleton className="h-[20dvh] w-[50dvw] rounded-full" />
-            <Skeleton className="h-[20dvh] w-[50dvw] rounded-full" />
-            <Skeleton className="h-[20dvh] w-[50dvw] rounded-full" />
+          <div className="hidden md:inline-block border rounded-2xl overflow-hidden p-5">
+            <Skeleton className="h-[20dvh] w-[60dvw] rounded-full" />
+            <Skeleton className="h-[20dvh] w-[60dvw] rounded-full" />
+            <Skeleton className="h-[20dvh] w-[60dvw] rounded-full" />
           </div>
         </div>
       )}

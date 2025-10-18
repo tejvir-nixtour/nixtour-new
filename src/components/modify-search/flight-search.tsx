@@ -61,6 +61,9 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
   const [loading, setLoading] = useState(false);
 
   const [show, setShow] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const [ModifyFlight, setModifyFlight] = useState<boolean>(true);
 
   const offersPerPage = 15;
 
@@ -77,6 +80,21 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
   useEffect(() => {
     const tomorrow = dayjs().add(1, 'day');
     setOnwardDate(tomorrow);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 450);
+    };
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Run once on mount in case screen size changed before component loaded
+    handleResize();
+
+    // Cleanup listener on unmount
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Function to swap airports
@@ -160,6 +178,8 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
       return;
     }
 
+    if (isMobile) setModifyFlight(false);
+
     const parameters = {
       CatalogProductOfferingsQueryRequest: {
         CatalogProductOfferingsRequest: {
@@ -226,6 +246,8 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
       },
     };
 
+    console.log('Parameters', parameters);
+
     // setCatalogProducts([]);
     // setBrands([]);
     // setProducts([]);
@@ -286,7 +308,10 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
 
         fetchAllFlights();
       })
-      .catch((error) => console.error(error))
+      .catch((error) => {
+        console.error(error);
+        setModifyFlight(true);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -305,6 +330,7 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
         CatalogProductOfferingsRequest: {
           '@type': 'CatalogProductOfferingsRequestAir',
           maxNumberOfUpsellsToReturn: 4,
+          offersPerPage: 100,
           sortBy: 'Price-LowToHigh',
           contentSourceList: ['GDS', 'NDC'],
           PassengerCriteria: [
@@ -418,10 +444,21 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
     }
   }
 
+  if (!ModifyFlight && isMobile)
+    return (
+      <Button
+        variant="default"
+        className="rounded-full my-4 bg-[#BC1110] hover:bg-[#BC1110]/90 text-white border-0 w-fit"
+        onClick={() => setModifyFlight(true)}
+      >
+        Modify Flight Search
+      </Button>
+    );
+
   return (
     <>
       {/* Search Form */}
-      <div className="p-3 xs:p-4 relative z-2 max-w-[93dvw] md:max-w-7xl mx-auto">
+      <div className="p-3 xs:p-4 flex-1 relative z-2 max-w-[93dvw] md:max-w-7xl mx-auto">
         <div className="mx-auto rounded-2xl bg-white p-4 xs:p-6 shadow-xl border border-white/30">
           <form
             className="space-y-4 xs:space-y-8"
@@ -587,7 +624,7 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
                   className="w-full px-3 xs:py-4 rounded-[12px] border border-gray-300 focus:outline-none text-lg font-bold border-none"
                 />
                 <Label
-                  htmlFor="from"
+                  htmlFor="to"
                   className="w-full px-3 xs:px-4 text-gray-700 mb-1 block sm:text-[12px] text-[10px] font-semibold"
                 >
                   {toCity.split(' -')[1]}
@@ -632,13 +669,14 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
                     className={`${tripType === 'round-trip' ? 'flex-1' : ''}`}
                   >
                     <Label
-                      htmlFor="from"
+                      htmlFor="departure-date"
                       className="w-full px-3 text-gray-700 mb-1 block sm:text-[12px] text-[10px]"
                     >
                       Departure
                     </Label>
                     <DatePicker
                       className="w-full focus:outline-none font-bold border-none"
+                      id="departure-date"
                       placeholder="Select Departure date"
                       value={onwardDate}
                       format="DD MMM YYYY"
@@ -650,7 +688,7 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
                       onChange={(date) => setOnwardDate(date)}
                     />
                     <Label
-                      htmlFor="from"
+                      htmlFor="departure-date"
                       className="w-full px-3 text-gray-700 mb-1 block sm:text-[12px] text-[10px] font-semibold"
                     >
                       {onwardDate &&
@@ -678,6 +716,7 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
                   <DatePicker
                     className="w-full px-3 xs:px-4 border-none border-gray-300 rounded-[12px] focus:outline-none text-sm xs:text-base"
                     placeholder="Select return date"
+                    id="return"
                     value={returnDate}
                     format="DD MMM YYYY"
                     disabledDate={(current) => {
@@ -691,7 +730,7 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
                     onChange={(date) => setReturnDate(date)}
                   />
                   <Label
-                    htmlFor="to"
+                    htmlFor="return"
                     className="w-full px-3 text-gray-700 mb-1 block sm:text-[12px] text-[10px] font-semibold"
                   >
                     {returnDate &&
@@ -706,23 +745,26 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
               )}
 
               {/* Travelers & Class */}
-              <div className="flex-1 w-full border-b-2 md:border-r-2 md:border-b-0 cursor-pointer relative">
+              <div
+                className="flex-1 w-full border-b-2 md:border-r-2 md:border-b-0 cursor-pointer relative"
+                onClick={() => setShow(!show)}
+              >
                 <Label
-                  htmlFor="to"
-                  className="w-full px-3 xs:px-4 text-gray-700 mb-1 block sm:text-[12px] text-[10px]"
+                  htmlFor="traveler"
+                  className="w-full px-3 xs:px-4 text-gray-700 mb-1 block sm:text-[12px] text-[10px] cursor-pointer"
                 >
                   {/* <User className="inline-block mr-2" /> */}
                   Travellers & Class
                 </Label>
                 <div
                   className="px-3 w-full relative z-10 text-lg font-bold"
-                  onClick={() => setShow(!show)}
+                  id="traveler"
                 >
                   {getTravelersText()}
                 </div>
                 <Label
-                  htmlFor="to"
-                  className="w-full px-3 xs:px-4 text-gray-700 mb-1 block sm:text-[12px] text-[10px]"
+                  htmlFor="traveler"
+                  className="w-full px-3 xs:px-4 text-gray-700 mb-1 block sm:text-[12px] text-[10px] font-semibold cursor-pointer"
                 >
                   {/* <User className="inline-block mr-2" /> */}
                   {travelClass}

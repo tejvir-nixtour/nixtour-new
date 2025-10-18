@@ -117,6 +117,10 @@ export const FlightBox: React.FC<FlightDetail> = ({
 
         // push the collected details for this offering
         flightDetails.push({
+          id,
+          identifier:
+            flightsData?.CatalogProductOfferingsResponse
+              ?.CatalogProductOfferings?.Identifier?.value,
           priceDetails:
             offering?.BestCombinablePrice?.PriceBreakdown?.[0]?.Amount,
           brandDetails:
@@ -361,87 +365,101 @@ export const FlightBox: React.FC<FlightDetail> = ({
     flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings
       ?.CatalogProductOffering?.length
   );
-  console.log('filteredCatalogs', filteredCatalog.length);
+  console.log('filteredCatalogs', filteredCatalog?.length);
 
   const filteredCatalogs = filteredCatalog;
   // flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings
   //   ?.CatalogProductOffering;
 
   // console.log('Total', filteredCatalogs?.length);
+
+  console.log(airlineSpecificData);
   return (
     <div className="flex flex-col my-6 md:my-10 items-center gap-4 w-full md:w-[60%]">
-      <div className="mb-5 w-full overflow-y-hidden scrollbar-hide hide-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] rounded-2xl sm:rounded-2xl border">
-        <div className="max-w-[90dvw] mx-auto">
-          {' '}
-          {/* max-h-36*/}
-          <Table className="w-full h-fit">
-            {/* mb-4  [scrollbar-width:none] [-ms-overflow-style:none] sm:[scrollbar-width:thin] sm:[-ms-overflow-style:thin*/}
-            <TableCaption className="m-0">
-              {/* A list of airlines with stops and price. */}
-            </TableCaption>
+      {/* Airline Specific Results */}
 
-            <TableHeader>
-              <TableRow className="hover:bg-white">
-                <TableHead className="font-medium text-white bg-gray-500 border-b-slate-200 sticky left-0">
-                  Summary
-                </TableHead>
-                {airlineSpecificData?.map((air, i) => (
-                  <TableHead
-                    key={i}
-                    className="text-left whitespace-nowrap border border-r-1"
-                  >
-                    <span className="">
-                      {airlines?.find((a: any) => {
-                        return a?.IataCode === air?.airlineCode;
-                      })?.ImageUrl ? (
-                        <img
-                          src={`https://api.nixtour.com/api/Image/GetImage/${
-                            airlines?.find((a: any) => {
-                              return a?.IataCode === air?.airlineCode;
-                            })?.ImageUrl
-                          }`}
-                          alt={
-                            airlines?.find((a: any) => {
-                              return a?.IataCode === air?.airlineCode;
-                            })?.ImageUrl
-                          }
-                          className="h-20 object-contain object-center"
-                        />
-                      ) : (
-                        <Plane className="w-6 h-6 text-blue-700 bg-white border-0" />
-                      )}
-                    </span>
-                    <span className="text-[10px] font-medium uppercase text-gray-500 tracking-wide">
-                      {air?.airline ||
-                        airlines?.find(
-                          (airline) => airline?.IataCode === air?.airlineCode
-                        )?.AirlineName ||
-                        air?.airlineCode}
-                    </span>
+      {flightsData?.CatalogProductOfferingsResponse?.CatalogProductOfferings
+        ?.CatalogProductOffering?.length ? (
+        <div className="mb-5 max-w-fit self-center md:self-start md:max-w-full overflow-hidden rounded-2xl sm:rounded-2xl border border-gray-500 border-t-0 border-b-0 relative z-0 shadow-lg shadow-gray-500 hidden lg:inline-block">
+          <div className="max-w-[90dvw] max-h-[33.7dvh] md:max-h-fit">
+            {' '}
+            {/* max-h-36*/}
+            <Table className="max-w-full max-h-fit overflow-y-hidden scrollbar-hide hide-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] bg-white">
+              {/* mb-4  [scrollbar-width:none] [-ms-overflow-style:none] sm:[scrollbar-width:thin] sm:[-ms-overflow-style:thin*/}
+              <TableCaption className="m-0">
+                {/* A list of airlines with stops and price. */}
+              </TableCaption>
+
+              <TableHeader>
+                <TableRow className="hover:bg-white">
+                  <TableHead className="font-medium text-white bg-gray-500 border-b-slate-200 sticky left-0">
+                    Summary
                   </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {['NonStop', '1 Stop', '2+ Stops'].map((stops, i) => (
-                <TableRow key={i}>
-                  <TableCell className="font-medium text-white bg-gray-500 border-gray-500 border-b-slate-200 sticky left-0">
-                    {stops}
-                  </TableCell>
-                  {airlineSpecificData?.map((air, j) => (
-                    <TableCell key={j} className="text-xs border">
-                      {i === air.direct - 1 ? air?.price : '-'}
-                    </TableCell>
+                  {airlineSpecificData?.map((air, i) => (
+                    <TableHead
+                      key={i}
+                      className="text-left whitespace-nowrap border border-r-1 px-8 cursor-pointer"
+                    >
+                      <span className="">
+                        {airlines?.find((a: any) => {
+                          return a?.IataCode === air?.airlineCode;
+                        })?.ImageUrl ? (
+                          <img
+                            src={`https://api.nixtour.com/api/Image/GetImage/${
+                              airlines?.find((a: any) => {
+                                return a?.IataCode === air?.airlineCode;
+                              })?.ImageUrl
+                            }`}
+                            alt={
+                              airlines?.find((a: any) => {
+                                return a?.IataCode === air?.airlineCode;
+                              })?.ImageUrl
+                            }
+                            className="h-20 object-contain object-center"
+                          />
+                        ) : (
+                          <Plane className="w-6 h-6 text-blue-700 bg-white border-0" />
+                        )}
+                      </span>
+                      <span className="text-[10px] font-medium uppercase text-gray-500 tracking-wide">
+                        {air?.airline ||
+                          airlines?.find(
+                            (airline) => airline?.IataCode === air?.airlineCode
+                          )?.AirlineName ||
+                          air?.airlineCode}
+                      </span>
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
 
-        {/* Hide scrollbar cross-browser */}
-        <style>{`
+              <TableBody>
+                {['NonStop', '1 Stop', '2+ Stops'].map((stops, i) => (
+                  <TableRow key={i}>
+                    <TableCell className="font-medium text-white bg-gray-500 border-gray-500 border-b-slate-200 sticky left-0">
+                      {stops}
+                    </TableCell>
+                    {airlineSpecificData?.map((air, j) => (
+                      <TableCell
+                        key={j}
+                        className="text-xs border cursor-pointer"
+                      >
+                        {/* {i === air?.direct - 1
+                          ? `${air?.currencyCode} ${air?.price?.[i]}`
+                          : '-'} */}
+                        {air?.price?.[i] != 0
+                          ? `${air?.currencyCode} ${air?.price?.[i]}`
+                          : '-'}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Hide scrollbar cross-browser */}
+          <style>{`
           .scrollbar-hide::-webkit-scrollbar {
             display: none;
           }
@@ -451,16 +469,18 @@ export const FlightBox: React.FC<FlightDetail> = ({
           }
 
           /* Hide scrollbar but allow scrolling */
-.hide-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
-.hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
+          .hide-scrollbar {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+          }
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+          }
         `}</style>
-      </div>
+        </div>
+      ) : null}
+
+      {/* All Filtered Flights */}
 
       {filteredCatalogs?.length ? (
         filteredCatalogs.map((catalog: any) => {
@@ -828,6 +848,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
           No Flights Found!
         </h1>
       )}
+
       {/* Modal for selected flight - To be implemented */}
 
       <FlightFareModal

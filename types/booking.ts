@@ -7,5 +7,6 @@ export interface Travelers {
 export type TravelClass =
   | 'Economy'
   | 'Premium Economy'
+  | 'PremiumEconomy'
   | 'Business'
   | 'First Class';

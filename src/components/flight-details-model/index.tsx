@@ -12,6 +12,8 @@ import { Plane } from 'lucide-react';
 import { FlightDetailsDialogProps } from './types';
 import dayjs from 'dayjs';
 import { ShareScreenshot } from '../share-screenshot';
+import { DialogDescription } from '@radix-ui/react-dialog';
+import { useState } from 'react';
 
 // Helpers
 const formatTime = (str: string) => str.slice(0, 5); // expect HH:MM:SS
@@ -31,6 +33,8 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
 }) => {
   console.log(data);
   console.log(airlines);
+
+  const [showFare, setShowFare] = useState(false);
 
   function calculateTimeDifference(
     durationStart: any,
@@ -64,12 +68,14 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
       {/* Accessibility: DialogContent requires a DialogTitle for screen readers.
           We include a visually-hidden DialogTitle via the DialogHeader component.
           The visible heading further down is kept for visual layout. */}
-      <DialogContent className="bg-white max-w-5xl gap-0 w-[95vw] md:w-[90vw] lg:w-[1100px] p-0 rounded-2xl sm:rounded-2xl overflow-hidden">
+      <DialogContent className="bg-white max-w-5xl gap-0 w-[95vw] md:w-[90vw] lg:w-[1100px] p-0 rounded-2xl sm:rounded-2xl overflow-hidden border-black">
         <div id="flight-details" className=" h-fit w-fit">
           <DialogHeader>
             {/* visually hidden title to satisfy accessibility requirements */}
             <DialogTitle className="sr-only">Flight Details</DialogTitle>
           </DialogHeader>
+
+          <DialogDescription></DialogDescription>
 
           <div className="flex flex-col md:flex-row max-h-[90dvh] md:min-h-[60vh] overflow-y-scroll [scrollbar-width:none] [-ms-overflow-style:none]">
             {/* Left - Flight timeline/details */}
@@ -259,8 +265,21 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
               </ScrollArea>
             </div>
 
+            <Button
+              onClick={() => {
+                setShowFare(!showFare);
+                const ele: any = document.getElementById('fare-details');
+                ele.style.display = showFare ? 'inline-block' : 'hidden';
+              }}
+            >
+              Show Fare Details
+            </Button>
+
             {/* Right - Fare Summary / Tabs */}
-            <div className="w-full md:w-[360px] md:max-h-full p-6 bg-blue-700 text-white flex flex-col border-0">
+            <div
+              id="fare-details"
+              className="w-full md:w-[360px] md:max-h-full md:inline-block p-6 bg-blue-700 text-white flex flex-col border-0"
+            >
               <div className="flex items-start justify-between">
                 <div>
                   <h4 className="text-lg font-semibold">Fare Summary</h4>

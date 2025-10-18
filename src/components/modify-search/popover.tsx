@@ -29,10 +29,15 @@ export const PopoverContent: React.FC<TravelersAndClass> = ({
     if (newCount >= 0 && (increment ? totalPassengers < 9 : true)) {
       setLocalTravelers((prev) => ({ ...prev, [type]: newCount }));
     }
+
+    console.log(localClass, localTravelers);
   };
 
   return (
-    <div className="w-[320px] rounded-[12px] absolute bg-white border-2 top-25 -left-4 p-4 shadow-lg">
+    <div
+      className="w-[320px] rounded-[12px] absolute z-[100] bg-white border-2 top-25 md:-left-4 p-4 shadow-lg"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="space-y-4">
         {/* Travelers Section */}
         <div className="space-y-4">

@@ -52,7 +52,23 @@ export default function FlightFareModal({
     });
   }, [flight]);
 
-  console.log(flight);
+  console.log('flight-model', flight);
+
+  console.log('Unique Flights', uniqueFlights);
+
+  const handleBooking = (index: number = 0) => {
+    onOpenChange(false);
+
+    // console.log(
+    //   `/flight-booking/if=${uniqueFlights?.[index]?.identifier}&pid=${
+    //     uniqueFlights?.[index]?.productDetails?.[0]?.id
+    //   }&cid=${uniqueFlights?.[index]?.id}`
+    // );
+
+    window.location.href = `/flight-booking/if=${uniqueFlights?.[index]?.identifier}&pid=${
+      uniqueFlights?.[index]?.productDetails?.[0]?.id
+    }&cid=${uniqueFlights?.[index]?.id}`;
+  };
 
   // const fares = [
   //   {
@@ -640,7 +656,7 @@ export default function FlightFareModal({
 
         <div className="mt-4 flex justify-end">
           <Button
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleBooking(selected)}
             className="bg-[#BC1110] hover:bg-[#d60a0a] text-white px-6 py-2 rounded-xl text-md font-bold"
           >
             Book at&nbsp;

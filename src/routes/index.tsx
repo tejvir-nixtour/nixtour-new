@@ -36,6 +36,7 @@ import FlightRouteDetailsPage from '../pages/flight-route-details';
 
 import FlightPage from '../pages/new-pages';
 import { Analytics } from '@vercel/analytics/react';
+import { BookFlight } from '../pages/flight-booking';
 
 const Home = React.lazy(() => import('../pages/home'));
 const Router: React.FC = () => {
@@ -358,6 +359,7 @@ const Router: React.FC = () => {
 
             <Route path="/flight-search" element={<FlightPage />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/flight-booking/:fields" element={<BookFlight />} />
 
             {/* Catch all remaining routes and determine if they're flight routes or 404 */}
             <Route
