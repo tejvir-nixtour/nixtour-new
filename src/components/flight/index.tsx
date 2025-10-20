@@ -124,7 +124,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
           priceDetails:
             offering?.BestCombinablePrice?.PriceBreakdown?.[0]?.Amount,
           brandDetails:
-            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[2]?.Brand?.filter(
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[3]?.Brand?.filter(
               (b: any) => b.id === offering?.Brand?.BrandRef
             ),
           productDetails:
@@ -132,7 +132,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
               (p: any) => p.id === offering?.Product?.[0]?.productRef
             ),
           termsAndConditionsDetails:
-            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[3]?.TermsAndConditions?.filter(
+            flightsData?.CatalogProductOfferingsResponse?.ReferenceList?.[2]?.TermsAndConditions?.filter(
               (t: any) =>
                 t.id === offering?.TermsAndConditions?.termsAndConditionsRef
             ),
@@ -392,7 +392,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
 
               <TableHeader>
                 <TableRow className="hover:bg-white">
-                  <TableHead className="font-medium text-white bg-gray-500 border-b-slate-200 sticky left-0">
+                  <TableHead className="font-medium text-white bg-blue-700 border-b-slate-200 sticky left-0">
                     Summary
                   </TableHead>
                   {airlineSpecificData?.map((air, i) => (
@@ -436,13 +436,17 @@ export const FlightBox: React.FC<FlightDetail> = ({
               <TableBody>
                 {['NonStop', '1 Stop', '2+ Stops'].map((stops, i) => (
                   <TableRow key={i}>
-                    <TableCell className="font-medium text-white bg-gray-500 border-gray-500 border-b-slate-200 sticky left-0">
+                    <TableCell className="font-medium text-white bg-blue-700 border-gray-500 border-b-slate-200 sticky left-0">
                       {stops}
                     </TableCell>
                     {airlineSpecificData?.map((air, j) => (
                       <TableCell
                         key={j}
                         className="text-xs border cursor-pointer"
+                        onClick={() => {
+                          dialogData(air?.id);
+                          setOpen(true);
+                        }}
                       >
                         {/* {i === air?.direct - 1
                           ? `${air?.currencyCode} ${air?.price?.[i]}`

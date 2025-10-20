@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Navbar } from '../../components/navbar/navbar';
 
 export const BookFlight = () => {
   const params = useParams();
@@ -88,6 +89,7 @@ export const BookFlight = () => {
 
   return (
     <>
+      <Navbar />
       <h1>Flight Booking Page</h1>
     </>
   );

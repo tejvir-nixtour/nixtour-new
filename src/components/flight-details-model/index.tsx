@@ -13,7 +13,7 @@ import { FlightDetailsDialogProps } from './types';
 import dayjs from 'dayjs';
 import { ShareScreenshot } from '../share-screenshot';
 import { DialogDescription } from '@radix-ui/react-dialog';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Helpers
 const formatTime = (str: string) => str.slice(0, 5); // expect HH:MM:SS
@@ -35,6 +35,22 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
   console.log(airlines);
 
   const [showFare, setShowFare] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) setShowFare(true);
+      else setShowFare(false);
+    };
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Run once on mount in case screen size changed before component loaded
+    handleResize();
+
+    // Cleanup listener on unmount
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   function calculateTimeDifference(
     durationStart: any,
@@ -266,108 +282,115 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
             </div>
 
             <Button
+              className="md:hidden bg-[#BC1110] hover:bg-[#BC1110]/90 text-white"
               onClick={() => {
                 setShowFare(!showFare);
-                const ele: any = document.getElementById('fare-details');
-                ele.style.display = showFare ? 'inline-block' : 'hidden';
               }}
             >
-              Show Fare Details
+              {showFare ? `Hide Fare Details` : `Show Fare Details`}
             </Button>
 
-            {/* Right - Fare Summary / Tabs */}
-            <div
-              id="fare-details"
-              className="w-full md:w-[360px] md:max-h-full md:inline-block p-6 bg-blue-700 text-white flex flex-col border-0"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="text-lg font-semibold">Fare Summary</h4>
-                  <p className="text-sm opacity-80">Summary & rules</p>
-                </div>
-                {/* <div className="text-sm text-white/80">
+            {showFare && (
+              <>
+                {/*Right - Fare Summary / Tabs*/}
+                <div
+                  id="fare-details"
+                  className="w-full md:w-[360px] md:max-h-full md:inline-block p-6 bg-blue-700 text-white flex flex-col border-0"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="text-lg font-semibold">Fare Summary</h4>
+                      <p className="text-sm opacity-80">Summary & rules</p>
+                    </div>
+                    {/* <div className="text-sm text-white/80">
                 {data?.[0]?.priceDetails?.Base ?? '₹'}
               </div> */}
-              </div>
+                  </div>
 
-              <div className="mt-6 flex-1">
-                <div className="bg-white/10 rounded-lg p-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <div>Base Fare</div>
-                    <div className="font-medium">
-                      {data?.[0]?.priceDetails?.CurrencyCode?.value
-                        ? data?.[0]?.priceDetails?.CurrencyCode?.value
-                        : '₹'}{' '}
-                      {data?.[0]?.priceDetails?.Base
-                        ? data?.[0]?.priceDetails?.Base
-                        : null}
-                      {/* // Math.round(data?.[0]?.priceDetails?.Base * 0.6) // : '—' */}
+                  <div className="mt-6 flex-1">
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <div>Base Fare</div>
+                        <div className="font-medium">
+                          {data?.[0]?.priceDetails?.CurrencyCode?.value
+                            ? data?.[0]?.priceDetails?.CurrencyCode?.value
+                            : '₹'}{' '}
+                          {data?.[0]?.priceDetails?.Base
+                            ? data?.[0]?.priceDetails?.Base
+                            : null}
+                          {/* // Math.round(data?.[0]?.priceDetails?.Base * 0.6) // : '—' */}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-sm mt-2">
+                        <div>Fees & Taxes</div>
+                        <div className="font-medium">
+                          {(data?.[0]?.priceDetails?.Fees?.TotalFees || 0) +
+                          (data?.[0]?.priceDetails?.Taxes?.TotalTaxes || 0)
+                            ? `${
+                                data?.[0]?.priceDetails?.CurrencyCode?.value
+                                  ? data?.[0]?.priceDetails?.CurrencyCode?.value
+                                  : '₹'
+                              } ${
+                                (data?.[0]?.priceDetails?.Fees?.TotalFees ||
+                                  0) +
+                                (data?.[0]?.priceDetails?.Taxes?.TotalTaxes ||
+                                  0)
+                              }`
+                            : '—'}
+                        </div>
+                      </div>
+                      <hr className="my-3 border-white/20" />
+                      <div className="flex items-center justify-between text-base font-semibold">
+                        <div>Total</div>
+                        <div>
+                          {data?.[0]?.priceDetails?.Total
+                            ? `${
+                                data?.[0]?.priceDetails?.CurrencyCode?.value
+                                  ? data?.[0]?.priceDetails?.CurrencyCode?.value
+                                  : '₹'
+                              } ${data?.[0]?.priceDetails?.Total}`
+                            : `${
+                                data?.[0]?.priceDetails?.CurrencyCode?.value
+                                  ? data?.[0]?.priceDetails?.CurrencyCode?.value
+                                  : '₹'
+                              } ${
+                                (data?.[0]?.priceDetails?.Fees?.TotalFees ||
+                                  0) +
+                                (data?.[0]?.priceDetails?.Taxes?.TotalTaxes ||
+                                  0) +
+                                (data?.[0]?.priceDetails?.Base || 0)
+                              }`}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between text-sm mt-2">
-                    <div>Fees & Taxes</div>
-                    <div className="font-medium">
-                      {(data?.[0]?.priceDetails?.Fees?.TotalFees || 0) +
-                      (data?.[0]?.priceDetails?.Taxes?.TotalTaxes || 0)
-                        ? `${
-                            data?.[0]?.priceDetails?.CurrencyCode?.value
-                              ? data?.[0]?.priceDetails?.CurrencyCode?.value
-                              : '₹'
-                          } ${
-                            (data?.[0]?.priceDetails?.Fees?.TotalFees || 0) +
-                            (data?.[0]?.priceDetails?.Taxes?.TotalTaxes || 0)
-                          }`
-                        : '—'}
-                    </div>
-                  </div>
-                  <hr className="my-3 border-white/20" />
-                  <div className="flex items-center justify-between text-base font-semibold">
-                    <div>Total</div>
-                    <div>
-                      {data?.[0]?.priceDetails?.Total
-                        ? `${
-                            data?.[0]?.priceDetails?.CurrencyCode?.value
-                              ? data?.[0]?.priceDetails?.CurrencyCode?.value
-                              : '₹'
-                          } ${data?.[0]?.priceDetails?.Total}`
-                        : `${
-                            data?.[0]?.priceDetails?.CurrencyCode?.value
-                              ? data?.[0]?.priceDetails?.CurrencyCode?.value
-                              : '₹'
-                          } ${
-                            (data?.[0]?.priceDetails?.Fees?.TotalFees || 0) +
-                            (data?.[0]?.priceDetails?.Taxes?.TotalTaxes || 0) +
-                            (data?.[0]?.priceDetails?.Base || 0)
-                          }`}
-                    </div>
-                  </div>
-                </div>
 
-                <div className="mt-4 space-y-3">
-                  {/* <Button
+                    <div className="mt-4 space-y-3">
+                      {/* <Button
                   className="w-full bg-[#BC1110] hover:bg-[#d60a0a] rounded-full"
                   onClick={() => onOpenChange(false)}
                 >
                   Book
                 </Button> */}
-                  <Button variant="ghost" className="w-fit">
-                    Share
-                  </Button>
-                  <ShareScreenshot id={'flight-details'} />
-                </div>
-              </div>
+                      <Button variant="ghost" className="w-fit">
+                        Share
+                      </Button>
+                      <ShareScreenshot id={'flight-details'} />
+                    </div>
+                  </div>
 
-              <div className="mt-4 text-xs opacity-90">
-                <div className="mb-2">
-                  * Total fare displayed above has been rounded off and may thus
-                  show a slight difference.
+                  <div className="mt-4 text-xs opacity-90">
+                    <div className="mb-2">
+                      * Total fare displayed above has been rounded off and may
+                      thus show a slight difference.
+                    </div>
+                    <div className="bg-white/5 p-2 rounded-md text-[12px]">
+                      Deal — Get up to 19,000 off. Valid on all payment modes.
+                      Use code: INSTALE. TnC apply
+                    </div>
+                  </div>
                 </div>
-                <div className="bg-white/5 p-2 rounded-md text-[12px]">
-                  Deal — Get up to 19,000 off. Valid on all payment modes. Use
-                  code: INSTALE. TnC apply
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </div>
       </DialogContent>
