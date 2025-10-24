@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -50,6 +50,10 @@ export default function FlightFareModal({
       seen.add(total);
       return true;
     });
+  }, [flight]);
+
+  useEffect(() => {
+    setSelected(0);
   }, [flight]);
 
   console.log('flight-model', flight);

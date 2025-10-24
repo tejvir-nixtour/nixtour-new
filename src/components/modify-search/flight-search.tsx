@@ -61,7 +61,7 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
   const [loading, setLoading] = useState(false);
 
   const [show, setShow] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
 
   const [ModifyFlight, setModifyFlight] = useState<boolean>(true);
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FlightDetail } from './types';
-import { ChevronRight, IndianRupee, Plane } from 'lucide-react';
+import { IndianRupee, Plane } from 'lucide-react';
 import { Button } from '../ui/button';
 import dayjs from 'dayjs';
 import FlightFareModal from '../flight-model';
@@ -35,7 +35,7 @@ export const FlightBox: React.FC<FlightDetail> = ({
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 450);
+      setIsMobile(window.innerWidth <= 376);
     };
 
     // Add event listener
@@ -823,7 +823,11 @@ export const FlightBox: React.FC<FlightDetail> = ({
                 </div>
 
                 {/* CTA */}
-                <div className="flex lg:flex-col gap-2">
+                <div
+                  className={
+                    isMobile ? 'flex flex-row gap-2' : 'flex flex-col gap-2'
+                  }
+                >
                   <Button
                     className="rounded-xl md:px-6 px-2 bg-blue-600 hover:bg-blue-800 text-white"
                     onClick={() => {
@@ -831,7 +835,8 @@ export const FlightBox: React.FC<FlightDetail> = ({
                       setShowFlightDetails(true);
                     }}
                   >
-                    {isMobile ? <ChevronRight /> : `Details`}
+                    Details
+                    {/* {isMobile ? <ChevronRight /> : `Details`} */}
                   </Button>
                   <Button
                     className="rounded-xl md:px-6 px-2 bg-[#BC1110] hover:bg-[#BC1110]/90 text-white"
@@ -840,7 +845,8 @@ export const FlightBox: React.FC<FlightDetail> = ({
                       setOpen(true);
                     }}
                   >
-                    {isMobile ? <ChevronRight /> : `Select`}
+                    Select
+                    {/* {isMobile ? <ChevronRight /> : `Select`} */}
                   </Button>
                 </div>
               </div>

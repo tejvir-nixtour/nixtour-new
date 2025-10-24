@@ -44,49 +44,54 @@ export const ShareScreenshot: React.FC<SS> = ({ id }) => {
   //   };
 
   const captureScreenshot = async () => {
+    console.log(id);
     const element = document.getElementById(id);
     if (!element) return;
     // Find scrollable children inside
     const scrollables = element.querySelectorAll<HTMLElement>('*');
 
-    console.log(scrollables);
-
+    const style = window.getComputedStyle(element);
+    let overflow = style.overflow || 'none';
     // Save original styles
     const originalStyles: {
       el: HTMLElement;
       overflow: string;
       height: string;
     }[] = [];
-    scrollables.forEach((el) => {
-      const style = window.getComputedStyle(el);
 
-      // Only save scrollable elements (auto, scroll, or visible)
-      if (
-        style.overflow === 'auto' ||
-        style.overflowY === 'auto' ||
-        style.overflowY === 'scroll' ||
-        style.overflow === 'scroll' ||
-        style.overflowY !== 'visible'
-      ) {
-        originalStyles.push({
-          el,
-          overflow: el.style.overflow,
-          height: el.style.height,
-        });
-        el.style.overflow = 'visible';
-        el.style.height = `${el.scrollHeight + 4}px`;
-      } else if (el.id === 'flight-dialog-title') {
-        originalStyles.push({
-          el,
-          overflow: el.style.overflow,
-          height: el.style.height,
-        });
+    if (id === 'flight-details-with-fare')
+      scrollables.forEach((el) => {
+        const style = window.getComputedStyle(el);
 
-        // Special case for title, don't scroll
-        el.style.overflow = 'hidden';
-        el.style.height = `0px`;
-      }
-    });
+        // Only save scrollable elements (auto, scroll, or visible)
+
+        if (el.id === 'flight-dialog-title') {
+          originalStyles.push({
+            el,
+            overflow: el.style.overflow,
+            height: el.style.height,
+          });
+
+          // Special case for title, don't scroll
+          el.style.overflow = 'hidden';
+          el.style.height = `0px`;
+        } else if (
+          style.overflow === 'auto' ||
+          style.overflowY === 'auto' ||
+          style.overflowY === 'scroll' ||
+          style.overflow === 'scroll' ||
+          style.overflowY !== 'visible'
+        ) {
+          originalStyles.push({
+            el,
+            overflow: el.style.overflow,
+            height: el.style.height,
+          });
+          el.style.overflow = 'visible';
+          // el.style.height = `${el.scrollHeight}px`;
+        }
+      });
+    else element.style.overflow = 'visible';
 
     const canvas = await html2canvas(element, {
       scrollX: 0,
@@ -103,6 +108,8 @@ export const ShareScreenshot: React.FC<SS> = ({ id }) => {
       el.style.overflow = overflow;
       el.style.height = height;
     });
+
+    element.style.overflow = overflow;
 
     const dataUrl = canvas.toDataURL('image/png');
     setImageUrl(dataUrl);
@@ -196,9 +203,9 @@ export const ShareScreenshot: React.FC<SS> = ({ id }) => {
     <>
       <Button
         onClick={captureScreenshot}
-        className="bg-[#BC1110] hover:bg-[#BC1110]/90 text-white rounded-full"
+        className="bg-[#BC1110] hover:bg-[#BC1110]/90 text-white md:rounded-full w-full md:w-fit"
       >
-        📸 Take Screenshot
+        📸 Share
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>

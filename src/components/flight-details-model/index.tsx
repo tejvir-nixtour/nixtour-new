@@ -50,7 +50,7 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
 
     // Cleanup listener on unmount
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [data]);
 
   function calculateTimeDifference(
     durationStart: any,
@@ -85,7 +85,7 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
           We include a visually-hidden DialogTitle via the DialogHeader component.
           The visible heading further down is kept for visual layout. */}
       <DialogContent className="bg-white max-w-5xl gap-0 w-[95vw] md:w-[90vw] lg:w-[1100px] p-0 rounded-2xl sm:rounded-2xl overflow-hidden border-black">
-        <div id="flight-details" className=" h-fit w-fit">
+        <div id="flight-details-with-fare" className=" h-fit w-fit">
           <DialogHeader>
             {/* visually hidden title to satisfy accessibility requirements */}
             <DialogTitle className="sr-only">Flight Details</DialogTitle>
@@ -95,7 +95,10 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
 
           <div className="flex flex-col md:flex-row max-h-[90dvh] md:min-h-[60vh] overflow-y-scroll [scrollbar-width:none] [-ms-overflow-style:none]">
             {/* Left - Flight timeline/details */}
-            <div className="flex-1 p-6 pr-3 md:mx-0 md:p-6 md:pr-0 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] min-h-[40dvh] max-h-[70dvh]">
+            <div
+              className="flex-1 p-6 pr-3 md:mx-0 md:p-6 md:pr-0 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] min-h-[40dvh] max-h-[70dvh]"
+              id="flight-details"
+            >
               <div className="flex items-start justify-between">
                 <div id="flight-dialog-title">
                   <h3 className="text-lg font-semibold">Flight Details</h3>
@@ -281,14 +284,23 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
               </ScrollArea>
             </div>
 
-            <Button
-              className="md:hidden bg-[#BC1110] hover:bg-[#BC1110]/90 text-white"
-              onClick={() => {
-                setShowFare(!showFare);
-              }}
-            >
-              {showFare ? `Hide Fare Details` : `Show Fare Details`}
-            </Button>
+            <div className="md:hidden w-full flex">
+              <Button
+                className="md:hidden bg-[#BC1110] hover:bg-[#BC1110]/90 text-white w-full"
+                onClick={() => {
+                  setShowFare(!showFare);
+                }}
+              >
+                {showFare ? `Hide Fare Details` : `Show Fare Details`}
+              </Button>
+              <ShareScreenshot
+                id={
+                  window.innerWidth < 768
+                    ? 'flight-details'
+                    : 'flight-details-with-fare'
+                }
+              />
+            </div>
 
             {showFare && (
               <>
@@ -364,17 +376,14 @@ export const FlightDetailsDialog: React.FC<FlightDetailsDialogProps> = ({
                       </div>
                     </div>
 
-                    <div className="mt-4 space-y-3">
-                      {/* <Button
-                  className="w-full bg-[#BC1110] hover:bg-[#d60a0a] rounded-full"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Book
-                </Button> */}
-                      <Button variant="ghost" className="w-fit">
-                        Share
-                      </Button>
-                      <ShareScreenshot id={'flight-details'} />
+                    <div className="mt-4 space-y-3 w-40 rounded-2xl hidden md:inline-block">
+                      <ShareScreenshot
+                        id={
+                          window.innerWidth < 768
+                            ? 'flight-details'
+                            : 'flight-details-with-fare'
+                        }
+                      />
                     </div>
                   </div>
 
