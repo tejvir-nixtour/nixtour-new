@@ -17,6 +17,8 @@ import {
   TicketPercent,
 } from 'lucide-react';
 import Footer from '../../components/footer/footer';
+import { TripSummary } from '../../components/trip-summary';
+import { Button } from '../../components/ui/button';
 
 export const BookFlight = () => {
   const params = useParams();
@@ -25,9 +27,15 @@ export const BookFlight = () => {
 
   //   const [isLoading, setIsLoading] = useState(true);
 
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [flightDetails, setFlightDetails] = useState<any>(null);
+  const [passengersList, setPassengersList] = useState<any[]>([]);
+  const [contactDetail, setContactDetail] = useState<any>({
+    name: '',
+    number: '',
+    email: '',
+  });
 
   const data: any = {};
 
@@ -93,20 +101,81 @@ export const BookFlight = () => {
   };
 
   useEffect(() => {
-    // Fetch flight data based on params
-    // Example: fetch(`/api/flights/${params.flightId}`)
-
     getFlightDetails();
-    console.log(error);
 
-    // Update flight data in the state
-    // Example: setFlightData(response.data)
-  }, [params]);
+    const passengersDetails: any[] = [];
+
+    flightDetails?.OfferListResponse?.OfferID?.[0]?.Product?.[0]?.PassengerFlight?.map(
+      (passengers: any, index: number) => {
+        Array.from({
+          length: passengers?.passengerQuantity || 1,
+        }).map((_) =>
+          passengersDetails.push({
+            type:
+              passengers?.passengerTypeCode === 'ADT' && index != 0
+                ? 'CNN'
+                : passengers?.passengerTypeCode,
+            title: '',
+            first_name: '',
+            last_name: '',
+            dob: '',
+            passport_number: '',
+            passport_expiry: '',
+            nationality: '',
+            issuing_country: '',
+          })
+        );
+      }
+    );
+
+    return setPassengersList(passengersDetails);
+  }, []);
+
+  // Submit Function
+
+  async function handleSubmit() {
+    try {
+      // Validate contact
+      if (!contactDetail.name || contactDetail.name.length < 3)
+        return setError('Invalid Contact Name');
+      if (!contactDetail.number || contactDetail.number.length < 10)
+        return setError('Invalid Contact Number');
+      if (!contactDetail.email || !contactDetail.email.includes('@'))
+        return setError('Invalid Contact Email');
+
+      // Validate passengers
+      passengersList.forEach((passenger: any, i: number) => {
+        if (!passenger.first_name || passenger.first_name.length > 48)
+          return setError(`Invalid First Name ${i + 1}`);
+        if (!passenger.last_name || passenger.last_name.length > 48)
+          return setError(`Invalid Last Name ${i + 1}`);
+        if (!passenger.title) return setError(`Missing Title ${i + 1}`);
+        if (!passenger.dob) return setError(`Missing DOB ${i + 1}`);
+        if (data?.pr) {
+          if (!passenger.passport_number)
+            return setError(`Missing Passport Number ${i + 1}`);
+          if (!passenger.passport_expiry)
+            return setError(`Missing Passport Expiry ${i + 1}`);
+          if (!passenger.nationality)
+            return setError(`Missing Nationality ${i + 1}`);
+          if (!passenger.issuing_country)
+            return setError(`Missing Issuing Country ${i + 1}`);
+        }
+
+        console.log(passengersList, contactDetail);
+      });
+    } catch (err) {
+      console.error('Error in handleSubmit:', err);
+    } finally {
+      if (error) alert(error);
+      setError('');
+    }
+  }
 
   return (
     <>
       <Navbar />
-      <div className="bg-blue-700 p-4 max-w-[95dvw] mx-auto rounded-xl overflow-x-hidden">
+      {/* <div className="bg-blue-700 p-4 max-w-[95dvw] mx-auto rounded-xl overflow-x-hidden">
         <h1 className="font-bold text-2xl">
           Trip to{' '}
           {
@@ -117,11 +186,14 @@ export const BookFlight = () => {
             ]?.Flight?.Arrival?.location
           }
         </h1>
-      </div>
-      <div className="flex justify-between flex-col md:flex-row w-[95dvw] mx-auto">
-        <PassengerForm />
-        <div className="border p-4 my-4 rounded-xl font-bold h-fit w-[30%] hidden md:inline-block space-y-2">
-          <h2>Price Details</h2>
+      </div> */}
+
+      {/* Price Details */}
+
+      <div className="p-4 rounded-xl font-bold h-fit w-[25%] hidden md:inline-block space-y-2 bg-blue-700 text-white fixed top-[20%] right-[3.5%]">
+        <h2 className="text-lg">Price Details</h2>
+        <hr />
+        <div className="bg-blue-500 p-4 space-y-2">
           <p className="flex justify-between">
             <span>Base Price:</span>
             <span>
@@ -143,7 +215,7 @@ export const BookFlight = () => {
             </span>
           </p>
           <div className="w-full h-1 bg-gray-500 rounded-full"></div>
-          <p className="flex justify-between">
+          <p className="flex justify-between bg-[#BC1110] hover:bg-[#BC1110]/90 text-white rounded-[6px] p-2 px-3 cursor-pointer">
             <span>Total:</span>
             <span>
               {flightDetails?.OfferListResponse?.OfferID?.[0]?.Price
@@ -156,7 +228,64 @@ export const BookFlight = () => {
           </p>
         </div>
       </div>
-      <div className="w-[95dvw] mx-auto space-y-2 my-2 p-4">
+
+      {/* <TripSummary /> */}
+
+      <div className="flex w-[95dvw] md:w-[69.5%] md:p-4 m-4 my-0">
+        <TripSummary flightDetails={flightDetails} />
+      </div>
+
+      {/* Passenger Form */}
+
+      <div className="w-[95dvw] mx-auto space-y-2 my-0 p-4">
+        <h2 className="font-bold text-xl">Who is travelling?</h2>
+
+        {/* {flightDetails?.OfferListResponse?.OfferID?.[0]?.Product?.[0]?.PassengerFlight?.map(
+          (passengers: any, index: number) => {
+            console.log(passengers?.passengerQuantity);
+            return Array.from({
+              length: passengers?.passengerQuantity || 1,
+            }).map((_, i) => (
+              <div
+                key={`${i + index}-${passengers?.passengerTypeCode}`}
+                className="md:w-[69.5%] rounded-xl border p-4 shadow-md"
+              >
+                <p className="font-semibold">
+                  Passenger - [{' '}
+                  {passengers?.passengerTypeCode === 'ADT' && index != 0
+                    ? 'CNN'
+                    : passengers?.passengerTypeCode}{' '}
+                  {i + 1} ]
+                </p>
+                <hr className="my-2" />
+                <PassengerForm />
+              </div>
+            ));
+          }
+        )} */}
+
+        {passengersList?.map((passenger: any, index: number) => {
+          return (
+            <div
+              key={index}
+              className="md:w-[69.5%] rounded-xl border p-4 shadow-md"
+            >
+              <p className="font-semibold">
+                Passenger {index + 1} - [ {passenger?.type} ]
+              </p>
+              <hr className="my-2" />
+              <PassengerForm
+                index={index}
+                setPassengersList={setPassengersList}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Contact Details */}
+
+      <div className="w-[95dvw] mx-auto space-y-2 my-0 p-4">
         <h2 className="font-bold text-xl">Contact Details</h2>
 
         <div className="flex gap-4 md:justify-between flex-wrap rounded-xl md:w-[69.5%] border shadow-lg p-4">
@@ -165,7 +294,14 @@ export const BookFlight = () => {
             <Input
               id="contactName"
               placeholder="Enter contact name"
+              value={contactDetail.name}
               className="text-lg rounded-xl my-2 placeholder:text-gray-400"
+              onChange={(e) =>
+                setContactDetail({
+                  ...contactDetail,
+                  name: e.target.value,
+                })
+              }
               required
             />
           </div>
@@ -176,8 +312,15 @@ export const BookFlight = () => {
               id="contactEmail"
               placeholder="Enter contact email"
               className="text-lg rounded-xl my-2 placeholder:text-gray-400"
+              value={contactDetail.email}
               required
               type="email"
+              onChange={(e) =>
+                setContactDetail({
+                  ...contactDetail,
+                  email: e.target.value,
+                })
+              }
             />
           </div>
 
@@ -186,12 +329,21 @@ export const BookFlight = () => {
             <Input
               id="contactNumber"
               placeholder="Enter contact name"
+              value={contactDetail.number}
               className="text-lg rounded-xl my-2 placeholder:text-gray-400"
               required
+              onChange={(e) =>
+                setContactDetail({
+                  ...contactDetail,
+                  number: e.target.value,
+                })
+              }
             />
           </div>
         </div>
       </div>
+
+      {/* Baggage Allowance */}
 
       <div className="w-[95dvw] mx-auto space-y-2 my-2">
         <div className="md:w-[69.5%] space-y-4 p-4">
@@ -246,6 +398,8 @@ export const BookFlight = () => {
           </div> */}
         </div>
       </div>
+
+      {/* Cancellations & Changes */}
 
       <div className="w-[95dvw] mx-auto">
         <div className="w-full md:w-[69.5%] space-y-4 p-4">
@@ -305,6 +459,8 @@ export const BookFlight = () => {
         </div>
       </div>
 
+      {/* Discounts Cards and Promos */}
+
       <div className="w-[95dvw] mx-auto">
         <div className="md:w-[69.5%] p-4 space-y-4">
           {/* Header */}
@@ -352,6 +508,22 @@ export const BookFlight = () => {
           </Card>
         </div>
       </div>
+
+      {/* Next Button */}
+
+      <div className="w-[95dvw] mx-auto space-y-2 my-0 p-4">
+        <div className="md:w-[69.5%] md:pr-2">
+          <Button
+            variant="default"
+            className="bg-blue-700 hover:bg-blue-800 w-full rounded-xl text-lg"
+            onClick={handleSubmit}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+
+      {/* Footer */}
 
       <Footer />
     </>

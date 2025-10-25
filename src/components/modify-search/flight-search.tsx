@@ -306,6 +306,11 @@ export const ModifyFlight: React.FC<ModifyFlightInterface> = ({
         //     ?.Brand
         // );
 
+        sessionStorage.setItem('fromCity', fromCity);
+        sessionStorage.setItem('toCity', toCity);
+        sessionStorage.setItem('fromAirportCode', fromAirportCode);
+        sessionStorage.setItem('toAirportCode', toAirportCode);
+
         fetchAllFlights();
       })
       .catch((error) => {
